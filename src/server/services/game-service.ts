@@ -1,20 +1,21 @@
 import { Service, type OnTick } from "@flamework/core";
 import { Players, ServerStorage, Workspace as World } from "@rbxts/services";
-import { Janitor } from "@rbxts/janitor";
 import { Timer } from "@rbxts/timer";
 
 import type { OnPlayerJoin } from "server/hooks";
 import { Events } from "server/network";
 import Log from "shared/logger";
 
-const { updateIntermissionTimer, updateGameTimer } = Events
+const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted } = Events;
 
 const MAPS = <Model[]>ServerStorage.Maps.GetChildren();
 const SERVER_SETTINGS = ServerStorage.ServerSettings;
 const INTERMISSION_LENGTH = <number>SERVER_SETTINGS.GetAttribute("IntermissionLength");
 const GAME_LENGTH = <number>SERVER_SETTINGS.GetAttribute("GameLength");
+const MINIMUM_PLAYERS = <number>SERVER_SETTINGS.GetAttribute("MinimumPlayers");
 
 const enum GameState {
+  None,
   WaitingForPlayers,
   Intermission,
   Active
@@ -22,20 +23,22 @@ const enum GameState {
 
 @Service()
 export class GameService implements OnTick, OnPlayerJoin {
-  private state = GameState.WaitingForPlayers;
+  private state = GameState.None;
   private currentTimer?: Timer;
 
   public onPlayerJoin(): void {
     const playerCount = Players.GetPlayers().size();
-    if (playerCount < 2) return;
+    if (playerCount < MINIMUM_PLAYERS) return;
     if (this.state !== GameState.WaitingForPlayers) return;
 
     this.startIntermission();
   }
 
   public onTick(): void {
+    if (this.state === GameState.WaitingForPlayers) return;
+
     const playerCount = Players.GetPlayers().size();
-    if (playerCount < 2)
+    if (playerCount < MINIMUM_PLAYERS)
       this.waitForPlayers();
   }
 
@@ -49,17 +52,23 @@ export class GameService implements OnTick, OnPlayerJoin {
     selectedMap.Parent = World.LoadedMap;
 
     this.teleportPlayersToMap();
+    gameStarted.broadcast();
+    Log.info("Game started");
   }
 
   private startIntermission(): void {
     this.state = GameState.Intermission;
     this.cancelTimer();
     this.startTimer();
+    intermissionStarted.broadcast();
+    Log.info("Intermission started");
   }
 
   private waitForPlayers(): void {
     this.state = GameState.WaitingForPlayers;
     this.cancelTimer();
+    waitingForPlayers.broadcast();
+    Log.info("Waiting for players...");
   }
 
   private startTimer(): void {
@@ -68,7 +77,7 @@ export class GameService implements OnTick, OnPlayerJoin {
     const length = this.state === GameState.Active ? GAME_LENGTH : INTERMISSION_LENGTH;
     const updateRemote = this.state === GameState.Active ? updateGameTimer : updateIntermissionTimer;
     this.currentTimer = new Timer(length);
-    this.currentTimer.secondReached.Connect(() => updateRemote.broadcast(this.currentTimer!.getTimeLeft()));
+    this.currentTimer.secondReached.Connect(() => updateRemote.broadcast(math.round(this.currentTimer!.getTimeLeft())));
 
     let conn: RBXScriptConnection;
     conn = this.currentTimer.completed.Connect(() => {
