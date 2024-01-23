@@ -6,5 +6,5 @@
 
 ## Code Credits
 - Runic
-  - [https://github.com/R-unic](GitHub)
-  - [https://www.roblox.com/users/44966864/profile](Roblox)
+  - [GitHub](https://github.com/R-unic)
+  - [Roblox](https://www.roblox.com/users/44966864/profile)
