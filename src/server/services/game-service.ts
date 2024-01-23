@@ -3,12 +3,15 @@ import { Players, ServerStorage, RunService as Runtime, Workspace as World } fro
 import { Timer, TimerState } from "@rbxts/timer";
 
 import type { OnPlayerJoin } from "server/hooks";
-import { Events } from "server/network";
+import { Events, Functions } from "server/network";
 import Log from "shared/logger";
+import { slice } from "shared/utilities/helpers";
+import { MapVotingService } from "./map-voting-service";
 
-const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted } = Events;
+const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted, mapVotingStarted } = Events;
+const { getVotedMap } = Functions;
 
-const MAPS = <Model[]>ServerStorage.Maps.GetChildren();
+const MAPS = <GameMap[]>ServerStorage.Maps.GetChildren();
 const SERVER_SETTINGS = Runtime.IsStudio() ? ServerStorage.TestServerSettings : ServerStorage.ServerSettings;
 const INTERMISSION_LENGTH = <number>SERVER_SETTINGS.GetAttribute("IntermissionLength");
 const GAME_LENGTH = <number>SERVER_SETTINGS.GetAttribute("GameLength");
@@ -25,6 +28,10 @@ const enum GameState {
 export class GameService implements OnTick, OnPlayerJoin {
   private state = GameState.None;
   private currentTimer?: Timer;
+
+  public constructor(
+    private readonly mapVoting: MapVotingService
+  ) {}
 
   public onPlayerJoin(): void {
     const playerCount = Players.GetPlayers().size();
@@ -47,9 +54,9 @@ export class GameService implements OnTick, OnPlayerJoin {
     this.cancelTimer();
     this.startTimer();
 
-    const selectedMap = MAPS[math.random(0, MAPS.size() - 1)].Clone();
-    selectedMap.Name = "Environment"
-    selectedMap.Parent = World.LoadedMap;
+    const map = this.mapVoting.getWinner().Clone();
+    map.Name = "Environment"
+    map.Parent = World.LoadedMap;
 
     this.teleportPlayersToMap();
     gameStarted.broadcast();
@@ -60,6 +67,7 @@ export class GameService implements OnTick, OnPlayerJoin {
     this.state = GameState.Intermission;
     this.cancelTimer();
     this.startTimer();
+    this.startMapVoting();
     intermissionStarted.broadcast();
     Log.info("Intermission started");
   }
@@ -119,5 +127,14 @@ export class GameService implements OnTick, OnPlayerJoin {
     const lobbySpawns = <Part[]>World.Lobby.Spawns.GetChildren();
     const spawn = lobbySpawns[math.random(0, lobbySpawns.size() - 1)];
     this.teleportPlayers(spawn);
+  }
+
+  private startMapVoting(): void {
+    const shuffledMaps = MAPS
+      .map(map => map.Name)
+      .sort(() => (new Random).NextInteger(-1, 0) < 0);
+
+    const pool = slice(shuffledMaps, 0, 3);
+    mapVotingStarted.broadcast(pool);
   }
 }

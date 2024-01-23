@@ -12,29 +12,11 @@ interface PlayerGui extends BasePlayerGui {
     };
   };
   Menu: ScreenGui & {
-    ["Codes "]: Frame & {
-      ["Main Frame"]: ImageLabel & {
-        ["Redeem Button"]: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          LocalScript: LocalScript;
-        };
-        ["Codes Box"]: ImageLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextBox: TextBox & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-        };
-        TextLabel: TextLabel & {
+    Leaderboard: Frame & {
+      Main: ImageLabel & {
+        Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-        ImageButton: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-      };
-    };
-    leaderboards: Frame & {
-      ["Main Frame"]: ImageLabel & {
         Silver: ImageLabel & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
           TextLabel: TextLabel & {
@@ -47,42 +29,125 @@ interface PlayerGui extends BasePlayerGui {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
         };
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
         Bronze: ImageLabel & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
           TextLabel: TextLabel & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
         };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-        ImageButton: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
       };
     };
+    UIPadding: UIPadding;
     Buttons: Frame & {
-      ["Spectate button"]: ImageButton;
+      Inventory: ImageButton & {
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
+      };
       NoteDisplay: ImageLabel & {
         Display: TextLabel;
-        NoteShop: ImageButton & {
-          NoteShopUsage: LocalScript;
-        };
+        NoteShop: ImageButton;
       };
-      MenuFrame: ScrollingFrame & {
-        ["Shop button"]: ImageButton & {
+      SidePanel: Frame & {
+        Shop: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
-        ["Music button"]: ImageButton & {
+        UIPadding: UIPadding;
+        Codes: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
         UIListLayout: UIListLayout;
-        ["Twitter button"]: ImageButton & {
+        Music: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
-        LocalScript: LocalScript;
+      };
+      Spectate: ImageButton & {
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
       };
     };
-    ShopFrame: Frame & {
-      Shop: ImageLabel & {
+    DailyRewards: Frame & {
+      Main: ImageLabel & {
+        Day1: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          TextLabel: TextLabel & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+          ["Collect button"]: ImageButton & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+            TextLabel: TextLabel & {
+              UIAspectRatioConstraint: UIAspectRatioConstraint;
+            };
+          };
+        };
+        Exit: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+        Day4: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          TextLabel: TextLabel & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+          ["Collect button"]: ImageButton & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+            TextLabel: TextLabel;
+          };
+        };
+        Day3: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          TextLabel: TextLabel & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+          ["Collect button"]: ImageButton & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+            TextLabel: TextLabel;
+          };
+        };
+        Clock: ImageLabel & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          Countdown: TextLabel & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+        };
+        Day5: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          ["Collect button"]: ImageButton & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+        };
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
+        Day2: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          TextLabel: TextLabel & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+          ["Collect button"]: ImageButton & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+            TextLabel: TextLabel;
+          };
+        };
+      };
+    };
+    Spectate: Frame & {
+      Selector: ImageLabel & {
+        ["Cancel button"]: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
+        ScrollingFrame: ScrollingFrame & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+      };
+      Preview: ImageLabel & {
+        ["Cancel button"]: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
+        ScrollingFrame: ScrollingFrame & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+      };
+    };
+    Shop: Frame & {
+      Main: ImageLabel & {
         Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
@@ -113,11 +178,55 @@ interface PlayerGui extends BasePlayerGui {
         };
       };
     };
-    InventoryFrame: Frame & {
-      Inventory: ImageLabel & {
+    MapSelection: Frame & {
+      Main: ImageLabel & {
+        Exit: ImageButton;
+        Option1: ImageLabel & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          Selected: ImageLabel;
+          Select: ImageButton & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+        };
+        Option2: ImageLabel & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          Selected: ImageLabel;
+          Select: ImageButton & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+        };
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
+        Option3: ImageLabel & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          Selected: ImageLabel;
+          Select: ImageButton & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+        };
+      };
+    };
+    ["Codes "]: Frame & {
+      Main: ImageLabel & {
+        ["Redeem Button"]: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+        ["Codes Box"]: ImageLabel & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          TextBox: TextBox & {
+            UIAspectRatioConstraint: UIAspectRatioConstraint;
+          };
+        };
+        TextLabel: TextLabel & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
+        Exit: ImageButton;
+      };
+    };
+    Inventory: Frame & {
+      Main: ImageLabel & {
         Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
-          LocalScript: LocalScript;
         };
         Tabs: ScrollingFrame & {
           UIListLayout: UIListLayout;
@@ -146,63 +255,8 @@ interface PlayerGui extends BasePlayerGui {
         };
       };
     };
-    SpectateFrame: Frame & {
-      SpectatePreview: ImageLabel & {
-        ["Cancel button"]: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-        ScrollingFrame: ScrollingFrame & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-      };
-      SpectateSelector: ImageLabel & {
-        ["Cancel button"]: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-        ScrollingFrame: ScrollingFrame & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-      };
-    };
-    ["Top Messages"]: Frame & {
-      ["You are out"]: ImageLabel & {
-        TextLabel: TextLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-      };
-      GuiScript: LocalScript & {
-        ClientGuiController: ModuleScript;
-      };
-      ["You WOn"]: ImageLabel & {
-        TextLabel: TextLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-      };
-      ["You Find a chair"]: ImageLabel & {
-        TextLabel: TextLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-      };
-      ["time Left"]: ImageLabel & {
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-      };
-      Intermission: ImageLabel & {
-        Time: TextLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-        TextLabel: TextLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-      };
-    };
-    NoteShopFrame: Frame & {
-      NoteShop: ImageLabel & {
+    NoteShop: Frame & {
+      Main: ImageLabel & {
         Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
@@ -213,92 +267,6 @@ interface PlayerGui extends BasePlayerGui {
           };
         };
         UIAspectRatioConstraint: UIAspectRatioConstraint;
-      };
-    };
-    ["Inventory Button"]: ImageButton;
-    DailyRewardsFrame: Frame & {
-      DailyRewards: ImageLabel & {
-        Day1: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-            TextLabel: TextLabel & {
-              UIAspectRatioConstraint: UIAspectRatioConstraint;
-            };
-          };
-        };
-        ["Clock vector"]: ImageLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-        };
-        ["Day 5 locked"]: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        Day3: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-            TextLabel: TextLabel;
-          };
-        };
-        Day4: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-            TextLabel: TextLabel;
-          };
-        };
-        ["Day 5 collect"]: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-        Day2: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-            TextLabel: TextLabel;
-          };
-        };
-      };
-    };
-    MapSelectionFrame: Frame & {
-      MapSelection: ImageLabel & {
-        Exit: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        Option1: ImageLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          ImageButton: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-        };
-        Option2: ImageLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          ImageButton: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-        };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-        Option3: ImageLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          ImageButton: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-        };
       };
     };
   };

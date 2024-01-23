@@ -4,7 +4,7 @@ import StringUtils from "@rbxts/string-utils";
 import { StorableVector3 } from "../data-models/utility";
 import { Exception } from "../exceptions";
 
-const { floor, log, round, abs } = math;
+const { floor, log, round, abs, max, min } = math;
 
 export const Assets = ReplicatedFirst.Assets;
 
@@ -21,6 +21,21 @@ export function toRegion3({ CFrame, Size }: Part, areaShrink = 0): Region3 {
     new Vector3(x - wsx + areaShrink, y - wsy, z - wsz + areaShrink),
     new Vector3(x + wsx - areaShrink, y + wsy, z + wsz - areaShrink)
   );
+}
+
+export function slice<T extends defined>(arr: T[], start: number, end?: number): T[] {
+  const length = arr.size();
+
+  // Handling negative indices
+  const startIndex = start < 0 ? max(length + start, 0) : min(start, length);
+  const endIndex = end === undefined ? length : end < 0 ? max(length + end, 0) : min(end, length);
+
+  // Creating a new array with sliced elements
+  const slicedArray: T[] = [];
+  for (let i = startIndex; i < endIndex; i++)
+    slicedArray.push(arr[i]);
+
+  return slicedArray;
 }
 
 export function toTimerFormat(seconds: number): string {

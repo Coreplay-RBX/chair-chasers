@@ -15,13 +15,16 @@ interface ClientEvents {
   gameStarted(): void;
   updateIntermissionTimer(remaining: number): void;
   updateGameTimer(remaining: number): void;
+  mapVotingStarted(mapPool: string[]): void;
 }
 
 interface ServerFunctions {
   getData(key: DataKey): DataValue;
 }
 
-interface ClientFunctions {}
+interface ClientFunctions {
+  getVotedMap(): string
+}
 
 export const GlobalEvents = Networking.createEvent<ServerEvents, ClientEvents>();
 export const GlobalFunctions = Networking.createFunction<ServerFunctions, ClientFunctions>();
