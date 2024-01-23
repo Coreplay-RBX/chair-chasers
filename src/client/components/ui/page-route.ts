@@ -1,6 +1,8 @@
 import { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
 
+import { PlayerGui } from "shared/utilities/client";
+
 import type { UIBlurController } from "client/controllers/ui-blur-controller";
 
 interface Attributes {
@@ -8,7 +10,10 @@ interface Attributes {
   Blur?: boolean;
 }
 
-@Component({ tag: "PageRoute" })
+@Component({
+  tag: "PageRoute",
+  ancestorWhitelist: [ PlayerGui ]
+})
 export class PageRoute extends BaseComponent<Attributes, GuiButton> implements OnStart {
   public constructor(
     private readonly blur: UIBlurController
