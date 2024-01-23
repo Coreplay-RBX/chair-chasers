@@ -35,6 +35,9 @@ export class DataService implements OnInit {
 
 	private setup(player: Player): void {
     this.initialize(player, "notes", 0);
+		this.initialize(player, "inventory", {
+			chairSkins: []
+		});
 
 		Log.info("Initialized data");
 		dataLoaded.predict(player);

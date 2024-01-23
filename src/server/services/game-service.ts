@@ -58,7 +58,6 @@ export class GameService implements OnTick, OnPlayerJoin {
 
     this.teleportPlayersToMap();
     gameStarted.broadcast();
-    Log.info("Game started");
   }
 
   private startIntermission(): void {
@@ -67,14 +66,12 @@ export class GameService implements OnTick, OnPlayerJoin {
     this.startTimer();
     this.mapVoting.start();
     intermissionStarted.broadcast();
-    Log.info("Intermission started");
   }
 
   private waitForPlayers(): void {
     this.state = GameState.WaitingForPlayers;
     this.cancelTimer();
     waitingForPlayers.broadcast();
-    Log.info("Waiting for players...");
   }
 
   private startTimer(): void {
