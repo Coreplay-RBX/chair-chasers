@@ -1,5 +1,5 @@
 import { Service, type OnTick } from "@flamework/core";
-import { Players, ServerStorage, Workspace as World } from "@rbxts/services";
+import { Players, ServerStorage, RunService as Runtime, Workspace as World } from "@rbxts/services";
 import { Timer, TimerState } from "@rbxts/timer";
 
 import type { OnPlayerJoin } from "server/hooks";
@@ -9,7 +9,7 @@ import Log from "shared/logger";
 const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted } = Events;
 
 const MAPS = <Model[]>ServerStorage.Maps.GetChildren();
-const SERVER_SETTINGS = ServerStorage.ServerSettings;
+const SERVER_SETTINGS = Runtime.IsStudio() ? ServerStorage.TestServerSettings : ServerStorage.ServerSettings;
 const INTERMISSION_LENGTH = <number>SERVER_SETTINGS.GetAttribute("IntermissionLength");
 const GAME_LENGTH = <number>SERVER_SETTINGS.GetAttribute("GameLength");
 const MINIMUM_PLAYERS = <number>SERVER_SETTINGS.GetAttribute("MinimumPlayers");

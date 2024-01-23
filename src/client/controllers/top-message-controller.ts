@@ -21,11 +21,8 @@ export class TopMessageController implements OnInit {
   }
 
   public enable(messageName: MessageName): void {
-    for (const otherMessage of <ImageLabel[]>this.frames.GetChildren())
-      otherMessage.Visible = false;
-
-    const message = this.frames[messageName];
-    message.Visible = true;
+    for (const message of <ImageLabel[]>this.frames.GetChildren())
+      message.Visible = message.Name === messageName;
   }
 
   public disable(messageName: MessageName): void {
