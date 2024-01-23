@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "LGPL-3.0-or-later",
   "devDependencies": {
     "@rbxts/compiler-types": "^2.0.2-types.0",
     "@rbxts/types": "^1.0.642",
