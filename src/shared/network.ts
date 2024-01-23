@@ -10,6 +10,8 @@ interface ServerEvents {
 
 interface ClientEvents {
   dataUpdate(key: DataKey, value: DataValue): void;
+  updateIntermissionTimer(remaining: number): void;
+  updateGameTimer(remaining: number): void;
 }
 
 interface ServerFunctions {

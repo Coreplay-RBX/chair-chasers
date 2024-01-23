@@ -3,6 +3,7 @@ interface PlayerGui extends BasePlayerGui {
     Eliminated: ImageLabel;
     Win: ImageLabel;
     FindChair: ImageLabel;
+    WaitingForPlayers: ImageLabel;
     Intermission: ImageLabel & {
       Countdown: TextLabel;
     };
