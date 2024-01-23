@@ -1,3 +1,12 @@
 interface ReplicatedFirst extends Instance {
-  Assets: Folder;
+  Assets: Folder & {
+    Models: Folder & {
+      Chairs: Folder;
+      Vegetation: Folder;
+      Rocks: Folder;
+      Underwater: Folder;
+      Coin: Model;
+      Orb: Model;
+    };
+  };
 }
