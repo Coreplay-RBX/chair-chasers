@@ -43,9 +43,9 @@ interface PlayerGui extends BasePlayerGui {
       Inventory: ImageButton & {
         UIAspectRatioConstraint: UIAspectRatioConstraint;
       };
-      NoteDisplay: ImageLabel & {
-        Display: TextLabel;
-        NoteShop: ImageButton;
+      Notes: ImageLabel & {
+        Amount: TextLabel;
+        Shop: ImageButton;
       };
       SidePanel: Frame & {
         Shop: ImageButton & {

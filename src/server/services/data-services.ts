@@ -9,7 +9,7 @@ const { initializeData, setData, incrementData, dataLoaded, dataUpdate } = Event
 const { getData } = Functions;
 
 @Service()
-export class DataService implements OnInit {	
+export class DataService implements OnInit {
 	public onInit(): void {
 		DataStore2.Combine("DATA", ...DataKeys);
 		initializeData.connect((player) => this.setup(player));
@@ -34,11 +34,8 @@ export class DataService implements OnInit {
 	}
 
 	private setup(player: Player): void {
-		// intialize all data with a default value
-    // using the same examples:
-    this.initialize(player, "gold", 100);
-    this.initialize(player, "gems", 0);
-		
+    this.initialize(player, "notes", 0);
+
 		Log.info("Initialized data");
 		dataLoaded.predict(player);
 	}

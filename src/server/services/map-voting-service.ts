@@ -39,8 +39,6 @@ export class MapVotingService implements OnInit {
   }
 
   public voteFor(player: Player, mapIndex: number): void {
-    Log.info(`${player} voted for map #${mapIndex + 1}`);
-
     const votedFor = <Maybe<number>>player.GetAttribute("VotedFor");
     if (votedFor === mapIndex) return;
     if (votedFor !== undefined)
