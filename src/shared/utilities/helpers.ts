@@ -23,12 +23,12 @@ export function toRegion3({ CFrame, Size }: Part, areaShrink = 0): Region3 {
   );
 }
 
-export function slice<T extends defined>(arr: T[], start: number, end?: number): T[] {
+export function slice<T extends defined>(arr: T[], start: number, finish?: number): T[] {
   const length = arr.size();
 
   // Handling negative indices
   const startIndex = start < 0 ? max(length + start, 0) : min(start, length);
-  const endIndex = end === undefined ? length : end < 0 ? max(length + end, 0) : min(end, length);
+  const endIndex = finish === undefined ? length : finish < 0 ? max(length + finish, 0) : min(finish, length);
 
   // Creating a new array with sliced elements
   const slicedArray: T[] = [];

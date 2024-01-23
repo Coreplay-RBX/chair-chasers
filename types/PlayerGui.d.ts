@@ -180,28 +180,27 @@ interface PlayerGui extends BasePlayerGui {
     };
     MapSelection: Frame & {
       Main: ImageLabel & {
-        Exit: ImageButton;
-        Option1: ImageLabel & {
+        UIAspectRatioConstraint: UIAspectRatioConstraint;
+        Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
-          Selected: ImageLabel;
-          Select: ImageButton & {
+        };
+        Option1: ImageLabel & {
+          Selected: ImageLabel & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
+          Select: ImageButton;
         };
         Option2: ImageLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          Selected: ImageLabel;
-          Select: ImageButton & {
+          Selected: ImageLabel & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
+          Select: ImageButton;
         };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
         Option3: ImageLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          Selected: ImageLabel;
-          Select: ImageButton & {
+          Selected: ImageLabel & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
+          Select: ImageButton;
         };
       };
     };

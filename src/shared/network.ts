@@ -6,6 +6,7 @@ interface ServerEvents {
   dataLoaded(): void;
   setData(key: DataKey, value: DataValue): void;
   incrementData(key: ExtractKeys<GameDataModel, number>, amount?: number): void;
+  voteForMap(mapIndex: number): void;
 }
 
 interface ClientEvents {
@@ -16,15 +17,14 @@ interface ClientEvents {
   updateIntermissionTimer(remaining: number): void;
   updateGameTimer(remaining: number): void;
   mapVotingStarted(mapPool: string[]): void;
+  closeMapVotingFrame(): void;
 }
 
 interface ServerFunctions {
   getData(key: DataKey): DataValue;
 }
 
-interface ClientFunctions {
-  getVotedMap(): string
-}
+interface ClientFunctions {}
 
 export const GlobalEvents = Networking.createEvent<ServerEvents, ClientEvents>();
 export const GlobalFunctions = Networking.createFunction<ServerFunctions, ClientFunctions>();
