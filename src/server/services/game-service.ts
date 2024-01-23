@@ -1,6 +1,6 @@
 import { Service, type OnTick } from "@flamework/core";
 import { Players, ServerStorage, Workspace as World } from "@rbxts/services";
-import { Timer } from "@rbxts/timer";
+import { Timer, TimerState } from "@rbxts/timer";
 
 import type { OnPlayerJoin } from "server/hooks";
 import { Events } from "server/network";
@@ -97,7 +97,9 @@ export class GameService implements OnTick, OnPlayerJoin {
   }
 
   private cancelTimer(): void {
-    this.currentTimer?.stop();
+    if (this.currentTimer?.getState() === TimerState.Running)
+      this.currentTimer.stop();
+
     this.currentTimer?.destroy();
     this.currentTimer = undefined;
   }
