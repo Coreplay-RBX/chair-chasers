@@ -15,11 +15,11 @@ export class CloseButton extends BaseComponent<{}, GuiButton> implements OnStart
   ) { super(); }
 
   public onStart(): void {
-    this.instance.MouseButton1Click.Connect(() => {
+    this.maid.GiveTask(this.instance.MouseButton1Click.Connect(() => {
       const parentFrame = this.instance.FindFirstAncestorOfClass("Frame")!;
       parentFrame.Visible = false;
       (<PlayerGui["Menu"]>parentFrame.Parent).Buttons.Visible = true;
       this.blur.toggle(false);
-    });
+    }));
   }
 }

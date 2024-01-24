@@ -1,4 +1,5 @@
 interface ReplicatedFirst extends Instance {
+  CodeList: ModuleScript;
   Assets: Folder & {
     Models: Folder & {
       Chairs: Folder & {

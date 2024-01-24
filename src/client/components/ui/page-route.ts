@@ -22,10 +22,10 @@ export class PageRoute extends BaseComponent<Attributes, GuiButton> implements O
   ) { super(); }
 
   public onStart(): void {
-    this.instance.MouseButton1Click.Connect(() => {
+    this.maid.GiveTask(this.instance.MouseButton1Click.Connect(() => {
       this.menu.setPage(this.attributes.DestinationPage);
       if (this.attributes.Blur !== undefined)
         this.blur.toggle(this.attributes.Blur);
-    });
+    }));
   }
 }

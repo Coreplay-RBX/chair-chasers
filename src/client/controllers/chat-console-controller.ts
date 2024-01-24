@@ -12,7 +12,7 @@ export class ChatConsoleController implements OnInit {
     sendConsoleChatMessage.connect((text, chatType) =>
       StarterGui.SetCore("ChatMakeSystemMessage", {
         Text: `<b>[SYSTEM]:</b> ${text}`,
-        Color: chatType === ConsoleChatType.JoinOrLeave ? Color3.fromRGB(255, 245, 120) : Color3.fromRGB(115, 115, 115),
+        Color: chatType === ConsoleChatType.JoinOrLeave ? Color3.fromRGB(255, 245, 120) : Color3.fromRGB(170, 170, 170),
         Font: Enum.Font.SourceSans,
         TextSize: 18
       })

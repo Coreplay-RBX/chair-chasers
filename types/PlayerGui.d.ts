@@ -206,18 +206,19 @@ interface PlayerGui extends BasePlayerGui {
     };
     Codes: Frame & {
       Main: ImageLabel & {
-        ["Redeem Button"]: ImageButton & {
+        Redeem: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
-        ["Codes Box"]: ImageLabel & {
+        TextBubble: ImageLabel & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextBox: TextBox & {
+          Input: TextBox & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
         };
         TextLabel: TextLabel & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
+          UIStroke: UIStroke;
         };
+        StatusMessage: TextLabel;
         UIAspectRatioConstraint: UIAspectRatioConstraint;
         Exit: ImageButton;
       };
