@@ -5,6 +5,7 @@ import Object from "@rbxts/object-utils";
 import { Events } from "client/network";
 import { PlayerGui } from "shared/utilities/client";
 
+import type { MenuController } from "client/controllers/menu-controller";
 import type { UIBlurController } from "client/controllers/ui-blur-controller";
 
 const { mapVotingStarted, closeMapVotingFrame, voteForMap } = Events;
@@ -15,6 +16,7 @@ const { mapVotingStarted, closeMapVotingFrame, voteForMap } = Events;
 })
 export class MapVoting extends BaseComponent<{}, PlayerGui["Menu"]["MapSelection"]> implements OnStart {
   public constructor(
+    private readonly menu: MenuController,
     private readonly blur: UIBlurController
   ) { super(); }
 
@@ -22,8 +24,12 @@ export class MapVoting extends BaseComponent<{}, PlayerGui["Menu"]["MapSelection
     const main = this.instance.Main;
     const options = [main.Option1, main.Option2, main.Option3];
 
-    this.maid.GiveTask(closeMapVotingFrame.connect(() => this.toggle(false)));
+    this.maid.GiveTask(closeMapVotingFrame.connect(() => {
+      this.toggle(false);
+      this.menu.setPage("Buttons");
+    }));
     this.maid.GiveTask(mapVotingStarted.connect(maps => {
+      this.menu.hideAllPages();
       this.toggle(true);
       for (const i of Object.keys(maps)) {
         const option = options[i - 1];

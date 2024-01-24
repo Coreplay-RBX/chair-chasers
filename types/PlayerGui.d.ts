@@ -204,7 +204,7 @@ interface PlayerGui extends BasePlayerGui {
         };
       };
     };
-    ["Codes "]: Frame & {
+    Codes: Frame & {
       Main: ImageLabel & {
         ["Redeem Button"]: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;

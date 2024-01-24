@@ -3,10 +3,11 @@ import { Component, BaseComponent } from "@flamework/components";
 
 import { PlayerGui } from "shared/utilities/client";
 
+import type { MenuController, PageName } from "client/controllers/menu-controller";
 import type { UIBlurController } from "client/controllers/ui-blur-controller";
 
 interface Attributes {
-  DestinationPage: string;
+  DestinationPage: PageName;
   Blur?: boolean;
 }
 
@@ -16,19 +17,15 @@ interface Attributes {
 })
 export class PageRoute extends BaseComponent<Attributes, GuiButton> implements OnStart {
   public constructor(
+    private readonly menu: MenuController,
     private readonly blur: UIBlurController
   ) { super(); }
 
   public onStart(): void {
     this.instance.MouseButton1Click.Connect(() => {
+      this.menu.setPage(this.attributes.DestinationPage);
       if (this.attributes.Blur !== undefined)
         this.blur.toggle(this.attributes.Blur);
-
-      const pages = this.instance.FindFirstAncestorOfClass("ScreenGui")!
-        .GetChildren()
-        .filter((child): child is Frame => child.IsA("Frame"));
-      for (const page of pages)
-        task.spawn(() => page.Visible = page.Name === this.attributes.DestinationPage);
     });
   }
 }

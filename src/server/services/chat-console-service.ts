@@ -24,7 +24,6 @@ export class ChatConsoleService implements OnInit, OnPlayerJoin, OnPlayerLeave {
     ];
 
     task.spawn(() => {
-      print(promotionInterval)
       while (true) {
         task.wait(promotionInterval);
         const randomPromotion = promotions[math.random(0, promotions.size() - 1)];

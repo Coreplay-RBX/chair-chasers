@@ -1,6 +1,6 @@
 import { Controller, type OnInit } from "@flamework/core";
+import { Lighting } from "@rbxts/services";
 import { TweenInfoBuilder } from "@rbxts/builders";
-import { Lighting, TweenService as Tween } from "@rbxts/services";
 import { tween } from "shared/utilities/ui";
 
 @Controller()
