@@ -1,5 +1,5 @@
 import { Service, type OnTick } from "@flamework/core";
-import { Players, ServerStorage, RunService as Runtime, Workspace as World } from "@rbxts/services";
+import { Players, Workspace as World } from "@rbxts/services";
 import { Timer, TimerState } from "@rbxts/timer";
 
 import { toSeconds } from "shared/utilities/helpers";
@@ -7,13 +7,9 @@ import { Events } from "server/network";
 import type { OnPlayerJoin } from "server/hooks";
 
 import type { MapVotingService } from "./map-voting-service";
+import { ServerSettingsService } from "./server-settings-service";
 
 const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted } = Events;
-
-const SERVER_SETTINGS = Runtime.IsStudio() ? ServerStorage.TestServerSettings : ServerStorage.ServerSettings;
-const INTERMISSION_LENGTH = toSeconds(<string>SERVER_SETTINGS.GetAttribute("IntermissionLength"));
-const GAME_LENGTH = toSeconds(<string>SERVER_SETTINGS.GetAttribute("GameLength"));
-const MINIMUM_PLAYERS = <number>SERVER_SETTINGS.GetAttribute("MinimumPlayers");
 
 const enum GameState {
   None,
@@ -24,16 +20,25 @@ const enum GameState {
 
 @Service()
 export class GameService implements OnTick, OnPlayerJoin {
+  private readonly intermissionLength: number;
+  private readonly gameLength: number;
+  private readonly minimumPlayers: number;
   private state = GameState.None;
   private currentTimer?: Timer;
 
   public constructor(
-    private readonly mapVoting: MapVotingService
-  ) {}
+    private readonly mapVoting: MapVotingService,
+    private readonly serverSettings: ServerSettingsService
+  ) {
+
+    this.intermissionLength = toSeconds(this.serverSettings.get<string>("IntermissionLength"));
+    this.gameLength = toSeconds(this.serverSettings.get<string>("GameLength"));
+    this.minimumPlayers = this.serverSettings.get<number>("MinimumPlayers");
+  }
 
   public onPlayerJoin(): void {
     const playerCount = Players.GetPlayers().size();
-    if (playerCount < MINIMUM_PLAYERS) return;
+    if (playerCount < this.minimumPlayers) return;
     if (this.state !== GameState.WaitingForPlayers) return;
 
     this.startIntermission();
@@ -43,7 +48,7 @@ export class GameService implements OnTick, OnPlayerJoin {
     if (this.state === GameState.WaitingForPlayers) return;
 
     const playerCount = Players.GetPlayers().size();
-    if (playerCount < MINIMUM_PLAYERS)
+    if (playerCount < this.minimumPlayers)
       this.waitForPlayers();
   }
 
@@ -77,7 +82,7 @@ export class GameService implements OnTick, OnPlayerJoin {
   private startTimer(): void {
     if (![GameState.Intermission, GameState.Active].includes(this.state)) return;
 
-    const length = this.state === GameState.Active ? GAME_LENGTH : INTERMISSION_LENGTH;
+    const length = this.state === GameState.Active ? this.gameLength : this.intermissionLength;
     const updateRemote = this.state === GameState.Active ? updateGameTimer : updateIntermissionTimer;
     this.currentTimer = new Timer(length);
     this.currentTimer.secondReached.Connect(() => updateRemote.broadcast(math.round(this.currentTimer!.getTimeLeft())));
