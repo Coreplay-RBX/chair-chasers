@@ -2,17 +2,17 @@ import { Service, type OnTick } from "@flamework/core";
 import { Players, ServerStorage, RunService as Runtime, Workspace as World } from "@rbxts/services";
 import { Timer, TimerState } from "@rbxts/timer";
 
-import type { OnPlayerJoin } from "server/hooks";
+import { toSeconds } from "shared/utilities/helpers";
 import { Events } from "server/network";
-import Log from "shared/logger";
+import type { OnPlayerJoin } from "server/hooks";
 
 import type { MapVotingService } from "./map-voting-service";
 
-const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted, mapVotingStarted } = Events;
+const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted } = Events;
 
 const SERVER_SETTINGS = Runtime.IsStudio() ? ServerStorage.TestServerSettings : ServerStorage.ServerSettings;
-const INTERMISSION_LENGTH = <number>SERVER_SETTINGS.GetAttribute("IntermissionLength");
-const GAME_LENGTH = <number>SERVER_SETTINGS.GetAttribute("GameLength");
+const INTERMISSION_LENGTH = toSeconds(<string>SERVER_SETTINGS.GetAttribute("IntermissionLength"));
+const GAME_LENGTH = toSeconds(<string>SERVER_SETTINGS.GetAttribute("GameLength"));
 const MINIMUM_PLAYERS = <number>SERVER_SETTINGS.GetAttribute("MinimumPlayers");
 
 const enum GameState {

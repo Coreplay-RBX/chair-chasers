@@ -1,5 +1,6 @@
 import { Networking } from "@flamework/networking";
-import { DataKey, DataValue, GameDataModel } from "./data-models/generic";
+import type { DataKey, DataValue, GameDataModel } from "./data-models/generic";
+import type ConsoleChatType from "./structs/console-chat-type";
 
 interface ServerEvents {
   initializeData(): void;
@@ -18,6 +19,7 @@ interface ClientEvents {
   updateGameTimer(remaining: number): void;
   mapVotingStarted(mapPool: string[]): void;
   closeMapVotingFrame(): void;
+  sendConsoleChatMessage(text: string, chatType: ConsoleChatType): void;
 }
 
 interface ServerFunctions {

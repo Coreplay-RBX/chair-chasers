@@ -29,8 +29,9 @@ export class MapVotingService implements OnInit {
   }
 
   public getWinner(): GameMap {
+    const unsortedVotes = [...this.currentVotes];
     const [highestVoted] = this.currentVotes.sort((a, b) => a > b);
-    const mapIndex = this.currentVotes.indexOf(highestVoted);
+    const mapIndex = unsortedVotes.indexOf(highestVoted);
     const winner = this.mapPool[mapIndex];
     this.reset();
 
