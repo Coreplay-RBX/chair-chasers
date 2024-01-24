@@ -1,7 +1,9 @@
 import { OnInit, Service } from "@flamework/core";
 import DataStore2 from "@rbxts/datastore2";
 
-import { DataKey, DataValue, DataKeys } from "shared/data-models/generic";
+import { type DataKey, type DataValue, DataKeys } from "shared/data-models/generic";
+import type EquippedItems from "shared/data-models/equipped-items";
+import type Inventory from "shared/data-models/inventory";
 import { Events, Functions } from "server/network";
 import Log from "shared/logger";
 
@@ -24,19 +26,20 @@ export class DataService implements OnInit {
 	}
 
 	public get<T extends DataValue = DataValue>(player: Player, key: DataKey): T {
-		const store = this.getStore<T>(player, key);
-		return store.Get()!;
+		return this.getStore<T>(player, key).Get()!;
 	}
 
 	public set<T extends DataValue = DataValue>(player: Player, key: DataKey, value: T): void {
-		const store = this.getStore<T>(player, key);
-		store.Set(value);
+		this.getStore<T>(player, key).Set(value);
 	}
 
 	private setup(player: Player): void {
     this.initialize(player, "notes", 0);
-		this.initialize(player, "inventory", {
+		this.initialize<Inventory>(player, "inventory", {
 			chairSkins: []
+		});
+		this.initialize<EquippedItems>(player, "equippedItems", {
+			chairSkin: undefined
 		});
 
 		Log.info("Initialized data");
