@@ -8,8 +8,6 @@ import type Inventory from "shared/data-models/inventory";
 import type EquippedItems from "shared/data-models/equipped-items";
 import type ChairSkinName from "shared/data-models/chair-skin-name";
 
-import type { ViewportCameraController } from "client/controllers/viewport-camera-controller";
-
 const { dataUpdate, setData } = Events;
 const { getData } = Functions;
 
@@ -26,40 +24,31 @@ export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventor
   private selectedTab = "Chairs";
   private selectedItem?: typeof Assets.UI.ViewportButton;
 
-  public constructor(
-    private readonly viewportCamera: ViewportCameraController
-  ) { super(); }
-
   public onStart(): void {
     this.maid.GiveTask(dataUpdate.connect((key, inventory: Inventory) => {
       if (key !== "inventory") return;
+      this.update(inventory);
+    }));
 
+    this.maid.GiveTask(this.instance.Main.Display.Equip.MouseButton1Click.Connect(() => this.equipSelected()));
+    this.createTabItemContainers();
+  }
+
+  private update(inventory: Inventory): void {
+    for (const tab of this.tabs) // get rid of old inventory buttons
+      tab.GetChildren()
+        .filter((i): i is ImageButton => i.IsA("ImageButton"))
+        .forEach(btn => btn.Destroy());
+
+    task.spawn(() => {
       for (const chairSkin of inventory.chairSkins) {
         const chairModel = <Model>Assets.Models.Chairs.WaitForChild(chairSkin).Clone();
         this.createInventoryButton(chairSkin, "Chairs", chairModel);
       }
-    }));
+    });
+  }
 
-    this.maid.GiveTask(this.instance.Main.Display.Equip.MouseButton1Click.Connect(async () => {
-      if (!this.selectedItem) return;
-
-      const equippedItems = <EquippedItems>await getData("equippedItems");
-      const category = <string>this.selectedItem.GetAttribute("ItemCategory");
-      const equippedItemType = this.getItemTypeFromTabName();
-      if (equippedItems[equippedItemType])
-        equippedItems[equippedItemType] = undefined; // unequip
-      else
-        switch(category) {
-          case "Chairs": {
-            const skinName = <ChairSkinName>this.selectedItem.GetAttribute("ItemName");
-            equippedItems.chairSkin = skinName;
-            break;
-          }
-        }
-
-      setData("equippedItems", equippedItems);
-    }));
-
+  private createTabItemContainers(): void {
     const tabButtons = this.instance.Main.Tabs.GetChildren()
       .filter((i): i is ImageButton => i.IsA("ImageButton"));
 
@@ -73,9 +62,27 @@ export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventor
     }
 
     this.switchTab("Chairs");
-    const viewportCamera = this.viewportCamera.createGeneric();
-    this.instance.Main.Display.Viewport.CurrentCamera = viewportCamera;
-    viewportCamera.Parent = this.instance.Main.Display.Viewport;
+  }
+
+  private async equipSelected(): Promise<void> {
+    if (!this.selectedItem) return;
+
+    const equippedItems = <EquippedItems>await getData("equippedItems");
+    const category = <string>this.selectedItem.GetAttribute("ItemCategory");
+    const equippedItemType = this.getItemTypeFromTabName();
+    if (equippedItems[equippedItemType])
+      equippedItems[equippedItemType] = undefined; // unequip
+
+    else
+      switch (category) {
+        case "Chairs": {
+          const skinName = <ChairSkinName>this.selectedItem.GetAttribute("ItemName");
+          equippedItems.chairSkin = skinName;
+          break;
+        }
+      }
+
+    setData("equippedItems", equippedItems);
   }
 
   private switchTab(tabName: string) {
@@ -116,9 +123,6 @@ export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventor
 
   private createInventoryButton(itemName: string, category: string, viewportModel: Model): void {
     const button = Assets.UI.ViewportButton.Clone();
-    const viewportCamera = this.viewportCamera.createGeneric();
-    button.Viewport.CurrentCamera = viewportCamera;
-    viewportCamera.Parent = button.Viewport;
     viewportModel.Parent = button.Viewport;
     button.Name = "InventoryItem";
     button.MouseButton1Click.Connect(() => this.selectButton(button));
