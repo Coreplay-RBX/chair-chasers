@@ -1,6 +1,11 @@
 interface ReplicatedFirst extends Instance {
   CodeList: ModuleScript;
   Assets: Folder & {
+    UI: Folder & {
+      ViewportButton: ImageButton & {
+        Viewport: ViewportFrame;
+      };
+    };
     Models: Folder & {
       Chairs: Folder & {
         ["Sun Chair"]: Model & {

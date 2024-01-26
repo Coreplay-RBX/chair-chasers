@@ -37,7 +37,7 @@ export class DataService implements OnInit {
     this.initialize(player, "notes", 0);
 		this.initialize(player, "redeemedCodes", []);
 		this.initialize<Inventory>(player, "inventory", {
-			chairSkins: []
+			chairSkins: [ "Coral Chair" ]
 		});
 		this.initialize<EquippedItems>(player, "equippedItems", {
 			chairSkin: undefined

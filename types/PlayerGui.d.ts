@@ -228,7 +228,7 @@ interface PlayerGui extends BasePlayerGui {
         Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
-        Tabs: ScrollingFrame & {
+        Tabs: Frame & {
           UIListLayout: UIListLayout;
           Weapons: ImageButton & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
@@ -241,6 +241,7 @@ interface PlayerGui extends BasePlayerGui {
           };
         };
         Display: ImageLabel & {
+          Viewport: ViewportFrame;
           Equip: ImageButton & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };

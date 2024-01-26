@@ -20,10 +20,10 @@ interface Attributes {
 }
 
 @Component({
-  tag: "Codes",
+  tag: "CodesPage",
   ancestorWhitelist: [ PlayerGui ]
 })
-export class Codes extends BaseComponent<Attributes, PlayerGui["Menu"]["Codes"]> implements OnStart {
+export class CodesPage extends BaseComponent<Attributes, PlayerGui["Menu"]["Codes"]> implements OnStart {
   private readonly codes = <CodeList>require(ReplicatedFirst.CodeList);
 
   public onStart(): void {

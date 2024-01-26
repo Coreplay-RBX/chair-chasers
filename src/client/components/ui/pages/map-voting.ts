@@ -11,10 +11,10 @@ import type { UIBlurController } from "client/controllers/ui-blur-controller";
 const { mapVotingStarted, closeMapVotingFrame, voteForMap } = Events;
 
 @Component({
-  tag: "MapVoting",
+  tag: "MapVotingPage",
   ancestorWhitelist: [ PlayerGui ]
 })
-export class MapVoting extends BaseComponent<{}, PlayerGui["Menu"]["MapSelection"]> implements OnStart {
+export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelection"]> implements OnStart {
   public constructor(
     private readonly menu: MenuController,
     private readonly blur: UIBlurController
