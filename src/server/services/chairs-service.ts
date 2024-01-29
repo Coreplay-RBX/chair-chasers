@@ -1,5 +1,6 @@
 import { Service } from "@flamework/core";
 
+import { Events } from "server/network";
 import { toSeconds } from "shared/utilities/helpers";
 import Log from "shared/logger";
 
@@ -8,6 +9,7 @@ import type { GameService } from "./game-service";
 import type { DataService } from "./data-services";
 import type { ServerSettingsService } from "./server-settings-service";
 
+const { walkingAroundChairs, choosingChairs, eliminated, won } = Events;
 const { random } = math;
 
 @Service()
@@ -53,7 +55,7 @@ export class ChairsService {
     this.chairCircle.toggleAll(false);
     const length = random(this.minWalkingLength, this.maxWalkingLength);
     task.delay(length, () => this.startChoosing(_game));
-    Log.info("Walking around chairs...");
+    walkingAroundChairs.broadcast();
   }
 
   private startChoosing(_game: GameService): void {
@@ -68,19 +70,20 @@ export class ChairsService {
         this.selectWinner(_game);
     });
 
-    Log.info("Choosing chairs...");
+    choosingChairs.broadcast();
   }
 
   private selectWinner(_game: GameService) {
     const [winner] = _game.playersInGame;
     task.delay(5, () => this.cleanup(_game));
-    Log.info(`${winner} has won the game!`);
+    won.broadcast(`${winner.DisplayName} (${winner.Name}) has won the game!`);
   }
 
   private eliminateOutliers(_game: GameService): void {
     if (!this.chairCircle) return;
 
     const outliers = this.chairCircle.getOutliers(_game.playersInGame);
+    eliminated(outliers);
     for (const player of this.chairCircle!.getSeatedPlayers(_game.playersInGame))
       player.Character!.FindFirstChildOfClass("Humanoid")!.Jump = true;
 

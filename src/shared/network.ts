@@ -12,6 +12,7 @@ interface ServerEvents {
 
 interface ClientEvents {
   dataUpdate(key: DataKey, value: DataValue): void;
+  sendConsoleChatMessage(text: string, chatType: ConsoleChatType): void;
   waitingForPlayers(): void;
   intermissionStarted(): void;
   gameStarted(): void;
@@ -19,7 +20,10 @@ interface ClientEvents {
   updateGameTimer(remaining: number): void;
   mapVotingStarted(mapPool: string[]): void;
   closeMapVotingFrame(): void;
-  sendConsoleChatMessage(text: string, chatType: ConsoleChatType): void;
+  walkingAroundChairs(): void;
+  choosingChairs(): void;
+  eliminated(): void;
+  won(message: string): void;
 }
 
 interface ServerFunctions {

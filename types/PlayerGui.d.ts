@@ -1,7 +1,9 @@
 interface PlayerGui extends BasePlayerGui {
   TopMessages: ScreenGui & {
     Eliminated: ImageLabel;
-    Win: ImageLabel;
+    Win: ImageLabel & {
+      TextLabel: TextLabel;
+    };
     FindChair: ImageLabel;
     WaitingForPlayers: ImageLabel;
     Intermission: ImageLabel & {

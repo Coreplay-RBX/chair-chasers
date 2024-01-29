@@ -4,7 +4,12 @@ import { PlayerGui } from "shared/utilities/client";
 import { Events } from "client/network";
 import { toTimerFormat } from "shared/utilities/helpers";
 
-const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted } = Events;
+const {
+  waitingForPlayers,
+  updateIntermissionTimer, intermissionStarted,
+  updateGameTimer, gameStarted,
+  walkingAroundChairs, choosingChairs, eliminated, won
+} = Events;
 
 type MessageName = ExtractKeys<PlayerGui["TopMessages"], ImageLabel>;
 
@@ -18,6 +23,19 @@ export class TopMessageController implements OnInit {
     waitingForPlayers.connect(() => this.enable("WaitingForPlayers"));
     intermissionStarted.connect(() => this.enable("Intermission"));
     gameStarted.connect(() => this.disableAll());
+
+    walkingAroundChairs.connect(() => this.disable("FindChair"));
+    choosingChairs.connect(() => this.enable("FindChair"));
+    eliminated.connect(() => {
+      this.disableAll();
+      this.enable("Eliminated")
+      task.delay(4, () => this.disable("Eliminated"));
+    });
+    won.connect(message => {
+      this.disableAll();
+      this.frames.Win.TextLabel.Text = message;
+      this.enable("Win");
+    });
   }
 
   public enable(messageName: MessageName): void {
