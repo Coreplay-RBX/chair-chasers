@@ -28,6 +28,10 @@ export class MapVotingService implements OnInit {
     Log.info(`Started map voting. Current map pool: ${this.mapPool.map(map => map.Name).join(", ")}`);
   }
 
+  public openUI(player: Player): void {
+    mapVotingStarted(player, this.mapPool.map(map => map.Name));
+  }
+
   public getWinner(): GameMap {
     const unsortedVotes = [...this.currentVotes];
     const [highestVoted] = this.currentVotes.sort((a, b) => a > b);

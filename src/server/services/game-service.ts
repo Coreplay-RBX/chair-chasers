@@ -48,6 +48,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
       }
       case GameState.Intermission: {
         intermissionStarted(player);
+        this.mapVoting.openUI(player);
         break;
       }
       case GameState.Active: {
