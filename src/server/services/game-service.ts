@@ -4,10 +4,11 @@ import { Timer, TimerState } from "@rbxts/timer";
 
 import { toSeconds } from "shared/utilities/helpers";
 import { Events } from "server/network";
-import type { OnPlayerJoin } from "server/hooks";
+import type { OnPlayerJoin, OnPlayerLeave } from "server/hooks";
 
 import type { MapVotingService } from "./map-voting-service";
-import { ServerSettingsService } from "./server-settings-service";
+import type { ChairsService } from "./chairs-service";
+import type { ServerSettingsService } from "./server-settings-service";
 
 const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted } = Events;
 
@@ -19,7 +20,9 @@ const enum GameState {
 }
 
 @Service()
-export class GameService implements OnTick, OnPlayerJoin {
+export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
+  public readonly playersInGame: Player[] = [];
+
   private readonly intermissionLength: number;
   private readonly gameLength: number;
   private readonly minimumPlayers: number;
@@ -28,34 +31,57 @@ export class GameService implements OnTick, OnPlayerJoin {
 
   public constructor(
     private readonly mapVoting: MapVotingService,
-    private readonly serverSettings: ServerSettingsService
+    private readonly chairs: ChairsService,
+    serverSettings: ServerSettingsService
   ) {
 
-    this.intermissionLength = toSeconds(this.serverSettings.get<string>("IntermissionLength"));
-    this.gameLength = toSeconds(this.serverSettings.get<string>("GameLength"));
-    this.minimumPlayers = this.serverSettings.get<number>("MinimumPlayers");
+    this.intermissionLength = toSeconds(serverSettings.get<string>("Rounds_IntermissionLength"));
+    this.gameLength = toSeconds(serverSettings.get<string>("Rounds_GameLength"));
+    this.minimumPlayers = serverSettings.get<number>("Rounds_MinimumPlayers");
   }
 
   public onPlayerJoin(): void {
-    const playerCount = Players.GetPlayers().size();
-    if (playerCount < this.minimumPlayers) return;
     if (this.state !== GameState.WaitingForPlayers) return;
-
     this.startIntermission();
   }
 
+  public onPlayerLeave(player: Player): void {
+    if (this.playersInGame.includes(player))
+      this.playersInGame.remove(this.playersInGame.indexOf(player));
+  }
+
   public onTick(): void {
-    if (this.state === GameState.WaitingForPlayers) return;
+    if ([GameState.WaitingForPlayers, GameState.Active].includes(this.state)) return;
 
     const playerCount = Players.GetPlayers().size();
-    if (playerCount < this.minimumPlayers)
+    if (playerCount !== 0 && playerCount < this.minimumPlayers) // !== 0 to avoid spamming the remote before player has even loaded in
       this.waitForPlayers();
+  }
+
+  public eliminatePlayer(player: Player): void {
+    this.playersInGame.remove(this.playersInGame.indexOf(player));
+    this.teleportPlayerToLobby(player);
+  }
+
+  public startIntermission(): void {
+    this.state = GameState.Intermission;
+    this.playersInGame.clear();
+    this.cancelTimer();
+    this.startTimer();
+    this.mapVoting.start();
+    intermissionStarted.broadcast();
+  }
+
+  public conclude(): void {
+    this.teleportPlayersToLobby();
+    this.startIntermission();
+    World.LoadedMap.Environment?.Destroy();
   }
 
   private startGame(): void {
     this.state = GameState.Active;
     this.cancelTimer();
-    this.startTimer();
+    // this.startTimer();
 
     const map = this.mapVoting.getWinner().Clone();
     map.Name = "Environment"
@@ -63,14 +89,12 @@ export class GameService implements OnTick, OnPlayerJoin {
 
     this.teleportPlayersToMap();
     gameStarted.broadcast();
-  }
 
-  private startIntermission(): void {
-    this.state = GameState.Intermission;
-    this.cancelTimer();
-    this.startTimer();
-    this.mapVoting.start();
-    intermissionStarted.broadcast();
+    for (const player of Players.GetPlayers())
+      this.playersInGame.push(player);
+
+    this.chairs.spawn(map, this.playersInGame.size());
+    task.delay(3, () => this.chairs.beginGame(this));
   }
 
   private waitForPlayers(): void {
@@ -94,11 +118,6 @@ export class GameService implements OnTick, OnPlayerJoin {
 
       if (this.state === GameState.Intermission)
         this.startGame();
-      else {
-        this.teleportPlayersToLobby();
-        this.startIntermission();
-        World.LoadedMap.Environment?.Destroy();
-      }
     });
 
     this.currentTimer.start();
@@ -112,9 +131,13 @@ export class GameService implements OnTick, OnPlayerJoin {
     this.currentTimer = undefined;
   }
 
+  private teleportPlayer(player: Player, part: Part) {
+    player.Character!.PivotTo(part.CFrame.add(new Vector3(0, 6, 0)));
+  }
+
   private teleportPlayers(part: Part): void {
     for (const player of Players.GetPlayers())
-      player.Character!.PivotTo(part.CFrame.add(new Vector3(0, 6, 0)));
+      this.teleportPlayer(player, part);
   }
 
   private teleportPlayersToMap(): void {
@@ -123,9 +146,14 @@ export class GameService implements OnTick, OnPlayerJoin {
     this.teleportPlayers(spawn);
   }
 
-  private teleportPlayersToLobby(): void {
+  private teleportPlayerToLobby(player: Player): void {
     const lobbySpawns = <Part[]>World.Lobby.Spawns.GetChildren();
     const spawn = lobbySpawns[math.random(0, lobbySpawns.size() - 1)];
-    this.teleportPlayers(spawn);
+    this.teleportPlayer(player, spawn);
+  }
+
+  private teleportPlayersToLobby(): void {
+    for (const player of Players.GetPlayers())
+      this.teleportPlayerToLobby(player);
   }
 }

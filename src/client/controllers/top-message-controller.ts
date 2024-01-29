@@ -17,7 +17,7 @@ export class TopMessageController implements OnInit {
     updateGameTimer.connect(remaining => this.frames.RemainingTime.Countdown.Text = toTimerFormat(remaining));
     waitingForPlayers.connect(() => this.enable("WaitingForPlayers"));
     intermissionStarted.connect(() => this.enable("Intermission"));
-    gameStarted.connect(() => this.enable("RemainingTime"));
+    gameStarted.connect(() => this.disableAll());
   }
 
   public enable(messageName: MessageName): void {
@@ -31,5 +31,13 @@ export class TopMessageController implements OnInit {
   public disable(messageName: MessageName): void {
     const message = this.frames[messageName];
     message.Visible = false;
+  }
+
+  public disableAll(): void {
+    const messages = this.frames.GetChildren()
+      .filter((child): child is ImageLabel => child.IsA("ImageLabel"));
+
+    for (const message of messages)
+      message.Visible = false
   }
 }

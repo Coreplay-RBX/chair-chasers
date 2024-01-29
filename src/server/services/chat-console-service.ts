@@ -17,7 +17,7 @@ export class ChatConsoleService implements OnInit, OnPlayerJoin, OnPlayerLeave {
   ) {}
 
   public onInit(): void {
-    const promotionInterval = toSeconds(this.serverSettings.get<string>("ChatPromotionInterval"));
+    const promotionInterval = toSeconds(this.serverSettings.get<string>("Chat_PromotionInterval"));
     const promotions = [
       "Follow @OverpeakGames on Twitter for X notes!",
       "Follow @OverpeakGames on Twitter for exclusive codes!"
