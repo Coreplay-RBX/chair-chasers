@@ -15,31 +15,37 @@ const { mapVotingStarted, closeMapVotingFrame, voteForMap } = Events;
   ancestorWhitelist: [ PlayerGui ]
 })
 export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelection"]> implements OnStart {
+  private readonly main = this.instance.Main;
+  private readonly options = [this.main.Option1, this.main.Option2, this.main.Option3];
+
   public constructor(
     private readonly menu: MenuController,
     private readonly blur: UIBlurController
   ) { super(); }
 
   public onStart(): void {
-    const main = this.instance.Main;
-    const options = [main.Option1, main.Option2, main.Option3];
-
     this.maid.GiveTask(closeMapVotingFrame.connect(() => {
       this.toggle(false);
       this.menu.setPage("Buttons");
+      this.reset();
     }));
     this.maid.GiveTask(mapVotingStarted.connect(maps => {
       this.menu.hideAllPages();
       this.toggle(true);
       for (const i of Object.keys(maps)) {
-        const option = options[i - 1];
+        const option = this.options[i - 1];
         option.Select.MouseButton1Click.Connect(() => {
           voteForMap(i - 1);
-          for (const otherOption of options)
+          for (const otherOption of this.options)
             otherOption.Selected.Visible = otherOption === option;
         });
       }
     }));
+  }
+
+  private reset(): void {
+    for (const option of this.options)
+      option.Selected.Visible = false;
   }
 
   private toggle(on: boolean) {

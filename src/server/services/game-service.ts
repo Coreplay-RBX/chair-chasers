@@ -40,7 +40,22 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     this.minimumPlayers = serverSettings.get<number>("Rounds_MinimumPlayers");
   }
 
-  public onPlayerJoin(): void {
+  public onPlayerJoin(player: Player): void {
+    switch(this.state) {
+      case GameState.WaitingForPlayers: {
+        waitingForPlayers(player);
+        break;
+      }
+      case GameState.Intermission: {
+        intermissionStarted(player);
+        break;
+      }
+      case GameState.Active: {
+        gameStarted(player);
+        break;
+      }
+    }
+
     if (this.state !== GameState.WaitingForPlayers) return;
     this.startIntermission();
   }
@@ -93,7 +108,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     for (const player of Players.GetPlayers())
       this.playersInGame.push(player);
 
-    this.chairs.spawn(map, this.playersInGame.size());
+    this.chairs.spawn(map, this.playersInGame.size() - 1);
     task.delay(3, () => this.chairs.beginGame(this));
   }
 
