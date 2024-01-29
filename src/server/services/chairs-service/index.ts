@@ -4,10 +4,11 @@ import { Events } from "server/network";
 import { toSeconds } from "shared/utilities/helpers";
 import Log from "shared/logger";
 
-import { ChairCircle } from "../classes/chair-circle";
-import type { GameService } from "./game-service";
-import type { DataService } from "./data-services";
-import type { ServerSettingsService } from "./server-settings-service";
+import { ChairCircle } from "./chair-circle";
+import type { GameService } from "../game-service";
+import type { DataService } from "../data-services";
+import type { ServerSettingsService } from "../server-settings-service";
+import changeChairSkin from "./change-chair-skin";
 
 const { walkingAroundChairs, choosingChairs, eliminated, won } = Events;
 const { random } = math;
@@ -32,14 +33,12 @@ export class ChairsService {
 
   public beginGame(_game: GameService): void {
     if (!this.chairCircle) return;
-    Log.info("Began game of musical chairs");
     this.startWalking(_game);
   }
 
   public spawn(map: GameMap, amount: number): void {
     if (this.chairCircle) return;
     this.chairCircle = new ChairCircle(this.data, map, amount);
-    Log.info("Spawned chair circle");
   }
 
   public cleanup(_game: GameService): void {
@@ -84,18 +83,23 @@ export class ChairsService {
 
     const outliers = this.chairCircle.getOutliers(_game.playersInGame);
     eliminated(outliers);
-    for (const player of this.chairCircle!.getSeatedPlayers(_game.playersInGame))
-      player.Character!.FindFirstChildOfClass("Humanoid")!.Jump = true;
+    for (const player of this.chairCircle!.getSeatedPlayers(_game.playersInGame)) {
+      const humanoid = player.Character!.FindFirstChildOfClass("Humanoid")!;
+      const chair = this.chairCircle.chairs.find(chair => chair.Seat.Occupant === humanoid);
+      if (chair)
+        changeChairSkin(chair);
+
+      humanoid.Jump = true;
+    }
 
     for (const outlier of outliers) {
       _game.eliminatePlayer(outlier);
       this.chairCircle!.removeChair();
     }
 
-    Log.info(`Eliminated outliers: ${outliers.map(p => p.Name).join(", ")}`);
     if (_game.playersInGame.size() < 1) { // game ending conditions
       task.delay(5, () => this.cleanup(_game));
-      return Log.info(`No one has won the game.`);
+      return won.broadcast("No one has won the game!");
     } else if (_game.playersInGame.size() === 1)
       return this.selectWinner(_game);
 

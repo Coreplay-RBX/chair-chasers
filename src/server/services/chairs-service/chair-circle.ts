@@ -1,35 +1,24 @@
 import { Players, Workspace as World } from "@rbxts/services";
 
+import changeChairSkin from "./change-chair-skin";
+
 import { Assets } from "shared/utilities/helpers";
 import Destroyable from "shared/utilities/destroyable";
 import type EquippedItems from "shared/data-models/equipped-items";
-import type ChairSkinName from "shared/data-models/chair-skin-name";
 
-import type { DataService } from "../services/data-services";
-import { endsWith } from "@rbxts/string-utils";
+import type { DataService } from "../data-services";
 
 const CHAIR_MODEL = Assets.Models.Chairs["Basic Chair"];
 
 const { rad, sin, cos } = math;
 
-interface Chair extends Model {
+export interface Chair extends Model {
   Seat: Seat;
-}
-
-function changeChairSkin(chair: Chair, occupant?: Humanoid, skinName: ChairSkinName = "Basic Chair"): void {
-  if (chair.Name === skinName) return;
-  const skinnedChair = Assets.Models.Chairs[skinName].Clone();
-  skinnedChair.PivotTo(chair.GetPivot())
-  skinnedChair.Parent = World.LoadedMap.Chairs;
-  chair.Destroy();
-
-  if (occupant)
-    skinnedChair.Seat.Sit(occupant);
 }
 
 export class ChairCircle extends Destroyable {
   public spawned = false;
-  private readonly chairs: Chair[] = [];
+  public chairs: Chair[] = [];
 
   public constructor(
     private readonly data: DataService,
@@ -54,7 +43,6 @@ export class ChairCircle extends Destroyable {
   public removeChair(): void {
     if (this.size <= 0) return;
 
-    print("removed chair")
     const chair = this.chairs.shift()!;
     chair.Destroy();
     this.update();
@@ -62,27 +50,35 @@ export class ChairCircle extends Destroyable {
   }
 
   public toggleAll(on: boolean): void {
-    print("toggled chair seats", on ? "on" : "off")
     for (const chair of this.chairs)
-      task.spawn(() => {print("Chair:", chair.GetChildren()); chair.Seat.Disabled = !on});
+      task.spawn(() => chair.Seat.Disabled = !on);
   }
 
   private spawn(): void {
     this.spawned = true;
 
     for (let i = 0; i < this.size; i++) {
-      const chair = this.janitor.Add(CHAIR_MODEL.Clone());
+      let chair = this.janitor.Add(CHAIR_MODEL.Clone());
       chair.Seat.GetPropertyChangedSignal("Occupant").Connect(() => {
         const occupant = chair.Seat.Occupant;
-        if (!occupant)
-          return changeChairSkin(chair);
+        if (!occupant) {
+          const newChair = this.janitor.Add(changeChairSkin(chair)!);
+          if (newChair)
+            chair = newChair;
+
+          this.chairs = this.chairs.filter(c => c.Parent !== undefined);
+          this.chairs.push(chair);
+          return;
+        }
 
         const character = occupant.FindFirstAncestorOfClass("Model");
         const player = Players.GetPlayerFromCharacter(character);
         if (!player) return;
 
         const equipped = this.data.get<EquippedItems>(player, "equippedItems");
-        changeChairSkin(chair, occupant, equipped.chairSkin);
+        chair = this.janitor.Add(changeChairSkin(chair, occupant, equipped.chairSkin)!);
+        this.chairs = this.chairs.filter(c => c.Parent !== undefined);
+        this.chairs.push(chair);
       });
 
       chair.Seat.Disabled = true;

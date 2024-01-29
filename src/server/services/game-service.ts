@@ -41,7 +41,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   }
 
   public onPlayerJoin(player: Player): void {
-    switch(this.state) {
+    switch (this.state) {
       case GameState.WaitingForPlayers: {
         waitingForPlayers(player);
         break;
@@ -56,9 +56,6 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
         break;
       }
     }
-
-    if (this.state !== GameState.WaitingForPlayers) return;
-    this.startIntermission();
   }
 
   public onPlayerLeave(player: Player): void {
@@ -67,11 +64,15 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   }
 
   public onTick(): void {
-    if ([GameState.WaitingForPlayers, GameState.Active].includes(this.state)) return;
+    if (this.state === GameState.Active) return;
 
     const playerCount = Players.GetPlayers().size();
-    if (playerCount !== 0 && playerCount < this.minimumPlayers) // !== 0 to avoid spamming the remote before player has even loaded in
+    if (playerCount === 0) return;
+    if (playerCount < this.minimumPlayers) { // !== 0 to avoid spamming the remote before player has even loaded in
+      if (this.state === GameState.WaitingForPlayers) return; // if we're already waiting or already in a game, don't try to wait for players
       this.waitForPlayers();
+    } else if (this.state !== GameState.Intermission)
+      this.startIntermission();
   }
 
   public eliminatePlayer(player: Player): void {
@@ -97,7 +98,6 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   private startGame(): void {
     this.state = GameState.Active;
     this.cancelTimer();
-    // this.startTimer();
 
     const map = this.mapVoting.getWinner().Clone();
     map.Name = "Environment"
