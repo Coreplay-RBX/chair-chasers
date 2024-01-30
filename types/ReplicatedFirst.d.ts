@@ -1,6 +1,7 @@
 interface ReplicatedFirst extends Instance {
   CodeList: ModuleScript;
   Assets: Folder & {
+    Maps: Folder;
     UI: Folder & {
       ViewportButton: ImageButton & {
         Viewport: ViewportFrame;

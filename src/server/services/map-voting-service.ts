@@ -1,13 +1,13 @@
 import { Service, type OnInit } from "@flamework/core";
-import { Players, ServerStorage } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 
 import { Events } from "server/network";
-import { slice } from "shared/utilities/helpers";
+import { Assets, slice } from "shared/utilities/helpers";
 import Log from "shared/logger";
 
 const { voteForMap, closeMapVotingFrame, mapVotingStarted } = Events;
 
-const MAPS = <GameMap[]>ServerStorage.Maps.GetChildren();
+const MAPS = <GameMap[]>Assets.Maps.GetChildren();
 
 @Service()
 export class MapVotingService implements OnInit {

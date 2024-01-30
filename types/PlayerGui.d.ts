@@ -187,18 +187,21 @@ interface PlayerGui extends BasePlayerGui {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
         Option1: ImageLabel & {
+          MapViewport: ViewportFrame;
           Selected: ImageLabel & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
           Select: ImageButton;
         };
         Option2: ImageLabel & {
+          MapViewport: ViewportFrame;
           Selected: ImageLabel & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
           Select: ImageButton;
         };
         Option3: ImageLabel & {
+          MapViewport: ViewportFrame;
           Selected: ImageLabel & {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };

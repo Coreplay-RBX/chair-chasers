@@ -7,6 +7,7 @@ import { PlayerGui } from "shared/utilities/client";
 
 import type { MenuController } from "client/controllers/menu-controller";
 import type { UIBlurController } from "client/controllers/ui-blur-controller";
+import { Assets } from "shared/utilities/helpers";
 
 const { mapVotingStarted, closeMapVotingFrame, voteForMap } = Events;
 
@@ -25,15 +26,28 @@ export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelec
 
   public onStart(): void {
     this.maid.GiveTask(closeMapVotingFrame.connect(() => {
-      this.toggle(false);
       this.menu.setPage("Buttons");
+      this.toggle(false);
       this.reset();
+
+      for (const option of this.options)
+        option.MapViewport.FindFirstChildOfClass("Model")?.Destroy();
     }));
+
     this.maid.GiveTask(mapVotingStarted.connect(maps => {
       this.menu.hideAllPages();
       this.toggle(true);
-      for (const i of Object.keys(maps)) {
+
+      for (const [i, mapName] of Object.entries(maps)) {
         const option = this.options[i - 1];
+        const previewMap = <GameMap>Assets.Maps.WaitForChild(mapName).Clone();
+        const camera = new Instance("Camera");
+        camera.Focus = <CFrame>previewMap.GetAttribute("ThumbnailFocus");
+        camera.CFrame = <CFrame>previewMap.GetAttribute("ThumbnailCFrame");
+        camera.FieldOfView = <number>previewMap.GetAttribute("ThumbnailFOV");
+        previewMap.Parent = option.MapViewport;
+        option.MapViewport.CurrentCamera = camera;
+
         option.Select.MouseButton1Click.Connect(() => {
           voteForMap(i - 1);
           for (const otherOption of this.options)
