@@ -101,6 +101,7 @@ export class ChairsService {
   private selectWinner(_game: GameService) {
     const [winner] = _game.playersInGame;
     task.delay(5, () => this.cleanup(_game));
+    this.data.increment(winner, "wins");
     won.broadcast(`${winner.DisplayName} (${winner.Name}) has won the game!`);
   }
 
