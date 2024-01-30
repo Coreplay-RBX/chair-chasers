@@ -1,4 +1,5 @@
 import { Service } from "@flamework/core";
+import { RunService as Runtime, Workspace as World } from "@rbxts/services";
 
 import { Events } from "server/network";
 import { toSeconds } from "shared/utilities/helpers";
@@ -11,11 +12,12 @@ import type { ServerSettingsService } from "../server-settings-service";
 import changeChairSkin from "./change-chair-skin";
 
 const { walkingAroundChairs, choosingChairs, eliminated, won } = Events;
-const { random } = math;
+const { rad, sin, cos, random } = math;
 
 @Service()
 export class ChairsService {
   private chairCircle?: ChairCircle
+  private walkingAround = false;
 
   private readonly minWalkingLength: number;
   private readonly maxWalkingLength: number;
@@ -51,10 +53,34 @@ export class ChairsService {
   private startWalking(_game: GameService): void {
     if (!this.chairCircle) return;
 
+    this.walkingAround = true;
     this.chairCircle.toggleAll(false);
+
     const length = random(this.minWalkingLength, this.maxWalkingLength);
-    task.delay(length, () => this.startChoosing(_game));
+    task.delay(length, () => {
+      this.stopWalkingPlayers(_game);
+      this.startChoosing(_game);
+    });
+
+    task.spawn(() => {
+      const center = World.LoadedMap.Environment!.ChairSpawn.Position;
+      // HOW THE FUCK DO I WALK PLAYERS AROUND THIS SHIT
+      // ill figure it out eventually lol
+    });
+
     walkingAroundChairs.broadcast();
+  }
+
+  private stopWalkingPlayers(_game: GameService): void {
+    this.walkingAround = false;
+
+    _game.teleportPlayersToMap();
+    for (const player of _game.playersInGame) {
+      const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
+      if (!humanoid) continue;
+
+      humanoid.PlatformStand = false;
+    }
   }
 
   private startChoosing(_game: GameService): void {
@@ -89,6 +115,7 @@ export class ChairsService {
       if (chair)
         changeChairSkin(chair);
 
+      humanoid.JumpPower = 50;
       humanoid.Jump = true;
     }
 

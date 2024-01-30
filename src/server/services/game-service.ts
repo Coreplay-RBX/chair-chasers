@@ -95,6 +95,12 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     World.LoadedMap.Environment?.Destroy();
   }
 
+  public teleportPlayersToMap(): void {
+    const mapSpawns = <Part[]>World.LoadedMap.Environment!.PlayerSpawns.GetChildren();
+    const spawn = mapSpawns[math.random(0, mapSpawns.size() - 1)];
+    this.teleportPlayers(spawn);
+  }
+
   private startGame(): void {
     this.state = GameState.Active;
     this.cancelTimer();
@@ -154,12 +160,6 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   private teleportPlayers(part: Part): void {
     for (const player of Players.GetPlayers())
       this.teleportPlayer(player, part);
-  }
-
-  private teleportPlayersToMap(): void {
-    const mapSpawns = <Part[]>World.LoadedMap.Environment!.PlayerSpawns.GetChildren();
-    const spawn = mapSpawns[math.random(0, mapSpawns.size() - 1)];
-    this.teleportPlayers(spawn);
   }
 
   private teleportPlayerToLobby(player: Player): void {

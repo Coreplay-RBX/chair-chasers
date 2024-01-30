@@ -60,23 +60,17 @@ export class ChairCircle extends Destroyable {
     for (let i = 0; i < this.size; i++) {
       let chair = this.janitor.Add(CHAIR_MODEL.Clone());
       chair.Seat.GetPropertyChangedSignal("Occupant").Connect(() => {
-        const occupant = chair.Seat.Occupant;
-        if (!occupant) {
-          const newChair = this.janitor.Add(changeChairSkin(chair)!);
-          if (newChair)
-            chair = newChair;
+        const occupant = chair.FindFirstChildOfClass("Seat")?.Occupant;
+        if (!occupant) return;
 
-          this.chairs = this.chairs.filter(c => c.Parent !== undefined);
-          this.chairs.push(chair);
-          return;
-        }
-
+        occupant.JumpPower = 0;
         const character = occupant.FindFirstAncestorOfClass("Model");
         const player = Players.GetPlayerFromCharacter(character);
         if (!player) return;
 
         const equipped = this.data.get<EquippedItems>(player, "equippedItems");
-        chair = this.janitor.Add(changeChairSkin(chair, occupant, equipped.chairSkin)!);
+        const skinnedChair = changeChairSkin(chair, occupant, equipped.chairSkin)!;
+        chair = skinnedChair ? this.janitor.Add(skinnedChair) : chair;
         this.chairs = this.chairs.filter(c => c.Parent !== undefined);
         this.chairs.push(chair);
       });
