@@ -97,8 +97,10 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
 
   public teleportPlayersToMap(): void {
     const mapSpawns = <Part[]>World.LoadedMap.Environment!.PlayerSpawns.GetChildren();
-    const spawn = mapSpawns[math.random(0, mapSpawns.size() - 1)];
-    this.teleportPlayers(spawn);
+    for (const player of Players.GetPlayers()) {
+      const spawn = mapSpawns[math.random(0, mapSpawns.size() - 1)];
+      this.teleportPlayer(player, spawn);
+    }
   }
 
   private startGame(): void {
