@@ -102,7 +102,9 @@ export class ChairsService {
     const [winner] = _game.playersInGame;
     task.delay(5, () => this.cleanup(_game));
     this.data.increment(winner, "wins");
-    won.broadcast(`${winner.DisplayName} (${winner.Name}) has won the game!`);
+
+    const winnerName = winner.DisplayName !== winner.Name ? `${winner.DisplayName} (${winner.Name})` : winner.Name;
+    won.broadcast(`${winnerName} has won the game!`);
   }
 
   private eliminateOutliers(_game: GameService): void {
