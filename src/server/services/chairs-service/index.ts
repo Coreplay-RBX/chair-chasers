@@ -1,15 +1,17 @@
 import { Service } from "@flamework/core";
-import { RunService as Runtime, Workspace as World } from "@rbxts/services";
+import { Workspace as World } from "@rbxts/services";
 
 import { Events } from "server/network";
 import { toSeconds } from "shared/utilities/helpers";
 import Log from "shared/logger";
 
 import { ChairCircle } from "./chair-circle";
+import changeChairSkin from "./change-chair-skin";
+
 import type { GameService } from "../game-service";
 import type { DataService } from "../data-services";
+import type { EarningsService } from "../earnings-service";
 import type { ServerSettingsService } from "../server-settings-service";
-import changeChairSkin from "./change-chair-skin";
 
 const { walkingAroundChairs, choosingChairs, eliminated, won } = Events;
 const { rad, sin, cos, random } = math;
@@ -25,6 +27,7 @@ export class ChairsService {
 
   public constructor(
     private readonly data: DataService,
+    private readonly earnings: EarningsService,
     serverSettings: ServerSettingsService
   ) {
 
@@ -101,7 +104,7 @@ export class ChairsService {
   private selectWinner(_game: GameService) {
     const [winner] = _game.playersInGame;
     task.delay(5, () => this.cleanup(_game));
-    this.data.increment(winner, "wins");
+    this.earnings.addWin(winner);
 
     const winnerName = winner.DisplayName !== winner.Name ? `${winner.DisplayName} (${winner.Name})` : winner.Name;
     won.broadcast(`${winnerName} has won the game!`);

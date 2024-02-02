@@ -5,5 +5,9 @@ interface Workspace extends WorldModel {
   };
   Lobby: Folder & {
     Spawns: Folder;
+    Boards: Folder & {
+      WinsLeaderboard: LeaderboardModel;
+      NotesLeaderboard: LeaderboardModel;
+    };
   };
 }
