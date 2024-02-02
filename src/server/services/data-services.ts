@@ -1,23 +1,49 @@
 import { OnInit, Service } from "@flamework/core";
+import { DataStoreService } from "@rbxts/services"
 import DataStore2 from "@rbxts/datastore2";
+
+import type { OnPlayerJoin } from "server/hooks";
+import { Events, Functions } from "server/network";
 
 import { type DataKey, type DataValue, DataKeys } from "shared/data-models/generic";
 import type EquippedItems from "shared/data-models/equipped-items";
 import type Inventory from "shared/data-models/inventory";
-import { Events, Functions } from "server/network";
+import type EarningsHistory from "shared/data-models/earnings-history";
 import Log from "shared/logger";
+
 
 const { initializeData, setData, incrementData, dataLoaded, dataUpdate } = Events;
 const { getData } = Functions;
 
+// if you ever wanna wipe all data, just change the keyID
+// you can also use it to separate test databases and production databases
+const DATA_SCOPE = "PROD";
+
 @Service()
-export class DataService implements OnInit {
+export class DataService implements OnInit, OnPlayerJoin {
+	private readonly trackingDataStore = DataStoreService.GetDataStore("Tracking", DATA_SCOPE);
+
 	public onInit(): void {
 		DataStore2.Combine("DATA", ...DataKeys);
 		initializeData.connect((player) => this.setup(player));
 		setData.connect((player, key, value) => this.set(player, key, value));
 		incrementData.connect((player, key, amount) => this.increment(player, key, amount))
 		getData.setCallback((player, key) => this.get(player, key));
+	}
+
+	public onPlayerJoin(player: Player): void {
+		this.trackingDataStore.SetAsync(tostring(player.UserId), true);
+	}
+
+	public getAllStoredUserIDs(): number[] {
+		const keyPages = this.trackingDataStore.ListKeysAsync();
+		const keys: string[] = [];
+		while (true) {
+			keys.push(...<string[]>keyPages.GetCurrentPage());
+			if (keyPages.IsFinished) break;
+			keyPages.AdvanceToNextPageAsync();
+		}
+		return keys.map(k => tonumber(k)!);
 	}
 
 	public increment(player: Player, key: DataKey, amount = 1): void {
@@ -37,6 +63,7 @@ export class DataService implements OnInit {
     this.initialize(player, "notes", 0);
 		this.initialize(player, "wins", 0);
 		this.initialize(player, "redeemedCodes", []);
+		this.initialize<EarningsHistory[]>(player, "earningsHistory", []);
 		this.initialize<Inventory>(player, "inventory", {
 			chairSkins: []
 		});
@@ -70,9 +97,6 @@ export class DataService implements OnInit {
 	}
 
 	private getStore<T extends DataValue = DataValue>(player: Player, key: DataKey): DataStore2<T> {
-    // if you ever wanna wipe all data, just change the keyID
-    // you can also use it to separate test databases and production databases
-    const keyID = "PROD";
-		return DataStore2<T>(keyID + "_" + key, player);
+		return DataStore2<T>(`${DATA_SCOPE}_${key}`, player);
 	}
 }

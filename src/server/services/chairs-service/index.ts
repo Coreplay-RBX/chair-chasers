@@ -14,7 +14,7 @@ import type { EarningsService } from "../earnings-service";
 import type { ServerSettingsService } from "../server-settings-service";
 
 const { walkingAroundChairs, choosingChairs, eliminated, won } = Events;
-const { rad, sin, cos, random } = math;
+const { random } = math;
 
 @Service()
 export class ChairsService {
