@@ -4,7 +4,6 @@ import type ConsoleChatType from "./structs/console-chat-type";
 
 interface ServerEvents {
   initializeData(): void;
-  dataLoaded(): void;
   setData(key: DataKey, value: DataValue): void;
   incrementData(key: ExtractKeys<GameDataModel, number>, amount?: number): void;
   voteForMap(mapIndex: number): void;

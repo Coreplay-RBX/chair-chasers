@@ -11,8 +11,7 @@ import type Inventory from "shared/data-models/inventory";
 import type EarningsHistory from "shared/data-models/earnings-history";
 import Log from "shared/logger";
 
-
-const { initializeData, setData, incrementData, dataLoaded, dataUpdate } = Events;
+const { initializeData, setData, incrementData, dataUpdate } = Events;
 const { getData } = Functions;
 
 // if you ever wanna wipe all data, just change the keyID
@@ -21,7 +20,7 @@ const DATA_SCOPE = "PROD";
 
 @Service()
 export class DataService implements OnInit, OnPlayerJoin {
-	private readonly trackingDataStore = DataStoreService.GetDataStore("Tracking", DATA_SCOPE);
+	private readonly trackingDataStore = DataStoreService.GetOrderedDataStore("Tracking", DATA_SCOPE);
 
 	public onInit(): void {
 		DataStore2.Combine("DATA", ...DataKeys);
@@ -32,14 +31,16 @@ export class DataService implements OnInit, OnPlayerJoin {
 	}
 
 	public onPlayerJoin(player: Player): void {
-		this.trackingDataStore.SetAsync(tostring(player.UserId), true);
+		// this.trackingDataStore.SetAsync(tostring(player.UserId), 0);
 	}
 
-	public getAllStoredUserIDs(): number[] {
-		const keyPages = this.trackingDataStore.ListKeysAsync();
+	public getStoredUserIDs(amount: number): number[] {
+		const keyPages = this.trackingDataStore.GetSortedAsync(false, amount);
 		const keys: string[] = [];
 		while (true) {
-			keys.push(...<string[]>keyPages.GetCurrentPage());
+			for (const key of keyPages.GetCurrentPage().map(page => page.key))
+				keys.push(key);
+
 			if (keyPages.IsFinished) break;
 			keyPages.AdvanceToNextPageAsync();
 		}
@@ -72,7 +73,6 @@ export class DataService implements OnInit, OnPlayerJoin {
 		});
 
 		Log.info("Initialized data");
-		dataLoaded.predict(player);
 	}
 
 	private initialize<T extends DataValue = DataValue>(

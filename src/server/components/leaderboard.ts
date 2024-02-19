@@ -1,7 +1,7 @@
 import type { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
 
-import type { DataService } from "server/services/data-services";
+import type { DataService } from "server/services/data-service";
 
 const TOP_PLAYERS_SHOWN = 50; // top 50, top 100, etc
 
@@ -29,7 +29,7 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   }
 
   private getTopWeekly(): LeaderboardEntry[] {
-    const allStoredUserIDs = this.data.getAllStoredUserIDs();
+    const allUserIDs = this.data.getStoredUserIDs(TOP_PLAYERS_SHOWN);
     return [];
   }
 }

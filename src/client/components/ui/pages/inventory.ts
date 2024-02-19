@@ -1,5 +1,6 @@
 import type { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
+import { Janitor } from "@rbxts/janitor";
 
 import { Events, Functions } from "client/network";
 import { PlayerGui } from "shared/utilities/client";
@@ -19,18 +20,19 @@ const REGULAR_BUTTON = "rbxassetid://10160149748";
   ancestorWhitelist: [ PlayerGui ]
 })
 export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventory"]> implements OnStart {
+  private readonly janitor = new Janitor;
   private readonly itemsPageTemplate = this.instance.Main.Items;
   private readonly tabs: ScrollingFrame[] = [];
   private selectedTab = "Chairs";
   private selectedItem?: typeof Assets.UI.ViewportButton;
 
   public onStart(): void {
-    this.maid.GiveTask(dataUpdate.connect((key, inventory: Inventory) => {
+    this.janitor.Add(dataUpdate.connect((key, inventory) => {
       if (key !== "inventory") return;
-      this.update(inventory);
+      this.update(<Inventory>inventory);
     }));
 
-    this.maid.GiveTask(this.instance.Main.Display.Equip.MouseButton1Click.Connect(() => this.equipSelected()));
+    this.janitor.Add(this.instance.Main.Display.Equip.MouseButton1Click.Connect(() => this.equipSelected()));
     this.createTabItemContainers();
   }
 
@@ -58,7 +60,7 @@ export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventor
       frame.Visible = false;
       frame.Parent = this.instance.Main;
       this.tabs.push(frame);
-      this.maid.GiveTask(tabButton.MouseButton1Click.Connect(() => this.switchTab(tabButton.Name)));
+      this.janitor.Add(tabButton.MouseButton1Click.Connect(() => this.switchTab(tabButton.Name)));
     }
 
     this.switchTab("Chairs");

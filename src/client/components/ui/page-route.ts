@@ -1,5 +1,6 @@
 import { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
+import { Janitor } from "@rbxts/janitor";
 
 import { PlayerGui } from "shared/utilities/client";
 
@@ -16,13 +17,15 @@ interface Attributes {
   ancestorWhitelist: [ PlayerGui ]
 })
 export class PageRoute extends BaseComponent<Attributes, GuiButton> implements OnStart {
+  private readonly janitor = new Janitor;
+
   public constructor(
     private readonly menu: MenuController,
     private readonly blur: UIBlurController
   ) { super(); }
 
   public onStart(): void {
-    this.maid.GiveTask(this.instance.MouseButton1Click.Connect(() => {
+    this.janitor.Add(this.instance.MouseButton1Click.Connect(() => {
       this.menu.setPage(this.attributes.DestinationPage);
       if (this.attributes.Blur !== undefined)
         this.blur.toggle(this.attributes.Blur);

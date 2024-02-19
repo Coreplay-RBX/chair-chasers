@@ -5,11 +5,10 @@ import { Events } from "server/network";
 import { toSeconds } from "shared/utilities/helpers";
 import Log from "shared/logger";
 
-import { ChairCircle } from "./chair-circle";
-import changeChairSkin from "./change-chair-skin";
+import { ChairCollection } from "./chair-collection";
 
 import type { GameService } from "../game-service";
-import type { DataService } from "../data-services";
+import type { DataService } from "../data-service";
 import type { EarningsService } from "../earnings-service";
 import type { ServerSettingsService } from "../server-settings-service";
 
@@ -18,8 +17,7 @@ const { random } = math;
 
 @Service()
 export class ChairsService {
-  private chairCircle?: ChairCircle
-  private walkingAround = false;
+  private chairs?: ChairCollection
 
   private readonly minWalkingLength: number;
   private readonly maxWalkingLength: number;
@@ -37,27 +35,25 @@ export class ChairsService {
   }
 
   public beginGame(_game: GameService): void {
-    if (!this.chairCircle) return;
+    if (!this.chairs) return;
     this.startWalking(_game);
   }
 
   public spawn(map: GameMap, amount: number): void {
-    if (this.chairCircle) return;
-    this.chairCircle = new ChairCircle(this.data, map, amount);
+    if (this.chairs) return;
+    this.chairs = new ChairCollection(this.data, map, amount);
   }
 
   public cleanup(_game: GameService): void {
-    this.chairCircle?.destroy();
-    this.chairCircle = undefined;
+    this.chairs?.destroy();
+    this.chairs = undefined;
     _game.conclude();
     Log.info("Cleaned up game of musical chairs");
   }
 
   private startWalking(_game: GameService): void {
-    if (!this.chairCircle) return;
-
-    this.walkingAround = true;
-    this.chairCircle.toggleAll(false);
+    if (!this.chairs) return;
+    this.chairs.toggleAll(false);
 
     const length = random(this.minWalkingLength, this.maxWalkingLength);
     task.delay(length, () => {
@@ -65,19 +61,10 @@ export class ChairsService {
       this.startChoosing(_game);
     });
 
-    task.spawn(() => {
-      const center = World.LoadedMap.Environment!.ChairSpawn.Position;
-      // HOW THE FUCK DO I WALK PLAYERS AROUND THIS SHIT
-      // ill figure it out eventually lol
-    });
-
     walkingAroundChairs.broadcast();
   }
 
   private stopWalkingPlayers(_game: GameService): void {
-    this.walkingAround = false;
-
-    _game.teleportPlayersToMap();
     for (const player of _game.playersInGame) {
       const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
       if (!humanoid) continue;
@@ -87,11 +74,11 @@ export class ChairsService {
   }
 
   private startChoosing(_game: GameService): void {
-    if (!this.chairCircle) return;
+    if (!this.chairs) return;
+    this.chairs.toggleAll(true);
 
-    this.chairCircle.toggleAll(true);
     task.delay(this.choosingLength, () => {
-      if (!this.chairCircle) return;
+      if (!this.chairs) return;
       if (_game.playersInGame.size() > 1)
         this.eliminateOutliers(_game);
       else
@@ -111,15 +98,14 @@ export class ChairsService {
   }
 
   private eliminateOutliers(_game: GameService): void {
-    if (!this.chairCircle) return;
+    if (!this.chairs) return;
 
-    const outliers = this.chairCircle.getOutliers(_game.playersInGame);
+    const outliers = this.chairs.getOutliers(_game.playersInGame);
     eliminated(outliers);
-    for (const player of this.chairCircle!.getSeatedPlayers(_game.playersInGame)) {
+    for (const player of this.chairs!.getSeatedPlayers(_game.playersInGame)) {
       const humanoid = player.Character!.FindFirstChildOfClass("Humanoid")!;
-      const chair = this.chairCircle.chairs.find(chair => chair.Seat.Occupant === humanoid);
-      if (chair)
-        changeChairSkin(chair);
+      const chair = this.chairs.find(chair => chair.Seat.Occupant === humanoid)!;
+      this.chairs!.removeChair(chair);
 
       humanoid.JumpPower = 50;
       humanoid.Jump = true;
@@ -127,7 +113,7 @@ export class ChairsService {
 
     for (const outlier of outliers) {
       _game.eliminatePlayer(outlier);
-      this.chairCircle!.removeChair();
+
     }
 
     if (_game.playersInGame.size() < 1) { // game ending conditions
@@ -136,6 +122,6 @@ export class ChairsService {
     } else if (_game.playersInGame.size() === 1)
       return this.selectWinner(_game);
 
-    task.delay(3, () => this.startWalking(_game));
+    task.delay(3, () => this.startWalking(_game)); // if game isn't over, continue the cycle
   }
 }

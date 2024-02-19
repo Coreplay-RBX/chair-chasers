@@ -1,7 +1,8 @@
 interface GameMap extends Model {
   Thumbnail: Camera;
   PlayerSpawns: Folder;
-  ChairSpawn: Part;
+  ChairSpawns: Folder;
+  Map: Model;
 }
 
 interface LeaderboardModel extends Folder {

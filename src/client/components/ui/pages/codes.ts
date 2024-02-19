@@ -2,6 +2,7 @@ import type { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
 import { ReplicatedFirst } from "@rbxts/services";
 import { TweenInfoBuilder } from "@rbxts/builders";
+import { Janitor } from "@rbxts/janitor";
 import { trim } from "@rbxts/string-utils";
 
 import { Events, Functions } from "client/network";
@@ -24,10 +25,11 @@ interface Attributes {
   ancestorWhitelist: [ PlayerGui ]
 })
 export class CodesPage extends BaseComponent<Attributes, PlayerGui["Menu"]["Codes"]> implements OnStart {
+  private readonly janitor = new Janitor;
   private readonly codes = <CodeList>require(ReplicatedFirst.CodeList);
 
   public onStart(): void {
-    this.maid.GiveTask(this.instance.Main.Redeem.MouseButton1Click.Connect(() => {
+    this.janitor.Add(this.instance.Main.Redeem.MouseButton1Click.Connect(() => {
       this.redeem();
     }));
 

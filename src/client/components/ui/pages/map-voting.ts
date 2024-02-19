@@ -1,5 +1,6 @@
 import type { OnStart } from "@flamework/core";
 import { Component, BaseComponent } from "@flamework/components";
+import { Janitor } from "@rbxts/janitor";
 import Object from "@rbxts/object-utils";
 
 import { Events } from "client/network";
@@ -16,6 +17,7 @@ const { mapVotingStarted, closeMapVotingFrame, voteForMap } = Events;
   ancestorWhitelist: [ PlayerGui ]
 })
 export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelection"]> implements OnStart {
+  private readonly janitor = new Janitor;
   private readonly main = this.instance.Main;
   private readonly options = [this.main.Option1, this.main.Option2, this.main.Option3];
 
@@ -25,7 +27,7 @@ export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelec
   ) { super(); }
 
   public onStart(): void {
-    this.maid.GiveTask(closeMapVotingFrame.connect(() => {
+    this.janitor.Add(closeMapVotingFrame.connect(() => {
       this.menu.setPage("Buttons");
       this.toggle(false);
       this.reset();
@@ -34,7 +36,7 @@ export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelec
         option.MapViewport.FindFirstChildOfClass("Model")?.Destroy();
     }));
 
-    this.maid.GiveTask(mapVotingStarted.connect(maps => {
+    this.janitor.Add(mapVotingStarted.connect(maps => {
       this.menu.hideAllPages();
       this.toggle(true);
 

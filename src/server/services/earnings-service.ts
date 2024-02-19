@@ -2,7 +2,7 @@ import { Service } from "@flamework/core";
 
 import type EarningsHistory from "shared/data-models/earnings-history";
 
-import type { DataService } from "./data-services";
+import type { DataService } from "./data-service";
 
 @Service()
 export class EarningsService {

@@ -6,19 +6,17 @@ import { Assets } from "shared/utilities/helpers";
 import Destroyable from "shared/utilities/destroyable";
 import type EquippedItems from "shared/data-models/equipped-items";
 
-import type { DataService } from "../data-services";
+import type { DataService } from "../data-service";
 
 const CHAIR_MODEL = Assets.Models.Chairs["Basic Chair"];
-
-const { rad, sin, cos } = math;
 
 export interface Chair extends Model {
   Seat: Seat;
 }
 
-export class ChairCircle extends Destroyable {
+export class ChairCollection extends Destroyable {
   public spawned = false;
-  public chairs: Chair[] = [];
+  public collection: Chair[] = [];
 
   public constructor(
     private readonly data: DataService,
@@ -28,7 +26,11 @@ export class ChairCircle extends Destroyable {
 
     super();
     this.spawn();
-    this.janitor.Add(() => this.chairs.clear());
+    this.janitor.Add(() => this.collection.clear());
+  }
+
+  public find(predicate: (chair: Chair, index: number) => boolean | undefined): Maybe<Chair> {
+    return this.collection.find(predicate)
   }
 
   public getOutliers(playersInGame: Player[]): Player[] {
@@ -40,17 +42,16 @@ export class ChairCircle extends Destroyable {
     return playersInGame.filter(player => player.Character?.FindFirstChildOfClass("Humanoid")?.Sit);
   }
 
-  public removeChair(): void {
+  public removeChair(chair: Chair): void {
     if (this.size <= 0) return;
 
-    const chair = this.chairs.shift()!;
+    this.collection.remove(this.collection.indexOf(chair));
     chair.Destroy();
-    this.update();
     this.size--;
   }
 
   public toggleAll(on: boolean): void {
-    for (const chair of this.chairs)
+    for (const chair of this.collection)
       task.spawn(() => chair.Seat.Disabled = !on);
   }
 
@@ -71,37 +72,20 @@ export class ChairCircle extends Destroyable {
         const equipped = this.data.get<EquippedItems>(player, "equippedItems");
         const skinnedChair = changeChairSkin(chair, occupant, equipped.chairSkin)!;
         chair = skinnedChair ? this.janitor.Add(skinnedChair) : chair;
-        this.chairs = this.chairs.filter(c => c.Parent !== undefined);
-        this.chairs.push(chair);
+        this.collection = this.collection.filter(c => c.Parent !== undefined);
+        this.collection.push(chair);
       });
 
+      const chairSpawns = <Part[]>this.map.ChairSpawns.GetChildren();
+      const spawn = chairSpawns[math.random(0, chairSpawns.size() - 1)];
+      const [_, chairSize] = chair.GetBoundingBox();
+      const y = spawn.Position.Y - (spawn.Size.Y / 2) + (chairSize.Y / 2);
+      const pivot = chair.GetPivot()
+
+      chair.PivotTo(CFrame.lookAt(new Vector3(pivot.X, y, pivot.Z), this.map.GetPivot().Position));
       chair.Seat.Disabled = true;
       chair.Parent = World.LoadedMap.Chairs;
-      this.chairs.push(chair);
+      this.collection.push(chair);
     }
-
-    this.update();
-  }
-
-  private update(): void {
-    const angleIncrement = 360 / this.chairs.size();
-    const radius = this.map.ChairSpawn.Size.X / 2;
-    const centerHeight = this.map.ChairSpawn.Size.Y;
-    const center = this.map.ChairSpawn.Position;
-
-    for (const chair of this.chairs)
-      task.spawn(() => {
-        const i = this.chairs.indexOf(chair) + 1;
-        const angle = rad(i * angleIncrement);
-        const newX = center.X + cos(angle) * radius;
-        const newZ = center.Z - sin(angle) * radius;
-
-        const [_, chairSize] = chair.GetBoundingBox();
-        const newY = center.Y - (centerHeight / 2) + (chairSize.Y / 2);
-        const cf = new CFrame(new Vector3(center.X, newY, center.Z), new Vector3(newX, newY, newZ))
-          .mul(CFrame.Angles(0, rad(180), 0));
-
-        chair.PivotTo(cf.add(cf.LookVector.mul(this.chairs.size() - 1)));
-      });
   }
 }

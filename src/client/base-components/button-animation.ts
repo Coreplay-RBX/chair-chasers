@@ -1,5 +1,6 @@
 import { BaseComponent } from "@flamework/components";
 import { TweenInfoBuilder } from "@rbxts/builders";
+import { Janitor } from "@rbxts/janitor";
 
 interface Attributes {
   Hover?: boolean;
@@ -11,6 +12,7 @@ export default abstract class ButtonAnimation<
   I extends GuiButton = GuiButton
 > extends BaseComponent<Attributes & A, I> {
 
+  protected readonly janitor = new Janitor;
   protected readonly abstract tweenInfo: TweenInfoBuilder;
   protected readonly includeClick: boolean = true;
 
@@ -18,11 +20,11 @@ export default abstract class ButtonAnimation<
   protected abstract inactive(): void;
 
   public connectEvents(): void {
-    this.maid.GiveTask(this.instance.MouseEnter.Connect(() => this.active()));
-    this.maid.GiveTask(this.instance.MouseLeave.Connect(() => this.inactive()));
+    this.janitor.Add(this.instance.MouseEnter.Connect(() => this.active()));
+    this.janitor.Add(this.instance.MouseLeave.Connect(() => this.inactive()));
     if (this.includeClick) {
-      this.maid.GiveTask(this.instance.MouseButton1Down.Connect(() => this.inactive()));
-      this.maid.GiveTask(this.instance.MouseButton1Up.Connect(() => this.active()));
+      this.janitor.Add(this.instance.MouseButton1Down.Connect(() => this.inactive()));
+      this.janitor.Add(this.instance.MouseButton1Up.Connect(() => this.active()));
     }
   }
 }
