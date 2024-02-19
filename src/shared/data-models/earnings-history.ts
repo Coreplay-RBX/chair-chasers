@@ -1,5 +1,5 @@
 export default interface EarningsHistory {
-  readonly notesEarned: number;
-  readonly winsEarned: number;
+  readonly notes: number;
+  readonly wins: number;
   readonly timestamp: number;
 }

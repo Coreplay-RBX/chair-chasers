@@ -6,6 +6,23 @@ interface ReplicatedFirst extends Instance {
       ViewportButton: ImageButton & {
         Viewport: ViewportFrame;
       };
+      LeaderboardEntry: Frame & {
+        PlayerName: TextLabel & {
+          UIStroke: UIStroke;
+        };
+        Rank: TextLabel & {
+          UIStroke: UIStroke;
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+        Value: TextLabel & {
+          UIStroke: UIStroke;
+        };
+        Avatar: ImageLabel & {
+          UICorner: UICorner;
+          UIStroke: UIStroke;
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+      };
     };
     Models: Folder & {
       Chairs: Folder & {

@@ -2,7 +2,6 @@ import { OnInit, Service } from "@flamework/core";
 import { DataStoreService } from "@rbxts/services"
 import DataStore2 from "@rbxts/datastore2";
 
-import type { OnPlayerJoin } from "server/hooks";
 import { Events, Functions } from "server/network";
 
 import { type DataKey, type DataValue, DataKeys } from "shared/data-models/generic";
@@ -10,7 +9,6 @@ import type EquippedItems from "shared/data-models/equipped-items";
 import type Inventory from "shared/data-models/inventory";
 import type EarningsHistory from "shared/data-models/earnings-history";
 import Log from "shared/logger";
-import Object from "@rbxts/object-utils";
 
 const { initializeData, setData, incrementData, dataUpdate } = Events;
 const { getData } = Functions;
@@ -20,7 +18,7 @@ const { getData } = Functions;
 const DATA_SCOPE = "TEST";
 
 @Service()
-export class DataService implements OnInit, OnPlayerJoin {
+export class DataService implements OnInit {
 	private readonly trackedData: TrackedDataKey[] = ["notes", "wins"];
 
 	public onInit(): void {
@@ -31,13 +29,8 @@ export class DataService implements OnInit, OnPlayerJoin {
 		getData.setCallback((player, key) => this.get(player, key));
 	}
 
-	public onPlayerJoin(player: Player): void {
-		for (const key of this.trackedData)
-			this.getTrackingStore(key).SetAsync(tostring(player.UserId), this.get<number>(player, key));
-	}
-
-	public getTrackedUserIDs(key: TrackedDataKey): number[] {
-		const keyPages = this.getTrackingStore(key).ListKeysAsync(undefined, 40);
+	public getTrackedUserIDs(): number[] {
+		const keyPages = this.getEarningsHistoryStore().ListKeysAsync(undefined, 40);
 		const keys: string[] = [];
 		while (true) {
 			for (const key of keyPages.GetCurrentPage())
@@ -62,15 +55,22 @@ export class DataService implements OnInit, OnPlayerJoin {
 		this.getStore<T>(player, key).Set(value);
 	}
 
-	public getTrackingStore(key: TrackedDataKey): DataStore {
-		return DataStoreService.GetDataStore(key, DATA_SCOPE)
+	public addEarningsHistory(player: Player, history: EarningsHistory): void {
+		const id = tostring(player.UserId);
+		const store = this.getEarningsHistoryStore();
+		const allHistory = store.GetAsync<EarningsHistory[]>(id)[0] ?? [];
+		allHistory.push(history);
+		store.SetAsync(id, allHistory);
+	}
+
+	public getEarningsHistoryStore(): DataStore {
+		return DataStoreService.GetDataStore("earningsHistory", DATA_SCOPE);
 	}
 
 	private setup(player: Player): void {
     this.initialize(player, "notes", 0);
 		this.initialize(player, "wins", 0);
 		this.initialize(player, "redeemedCodes", []);
-		this.initialize<EarningsHistory[]>(player, "earningsHistory", []);
 		this.initialize<Inventory>(player, "inventory", {
 			chairSkins: []
 		});
