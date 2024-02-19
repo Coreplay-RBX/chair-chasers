@@ -1,3 +1,5 @@
+type TrackedDataKey = "notes" | "wins";
+
 interface GameMap extends Model {
   Thumbnail: Camera;
   PlayerSpawns: Folder;

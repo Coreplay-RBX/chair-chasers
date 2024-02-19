@@ -29,7 +29,7 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   }
 
   private getTopWeekly(): LeaderboardEntry[] {
-    const allUserIDs = this.data.getStoredUserIDs(TOP_PLAYERS_SHOWN);
+    // const allUserIDs = this.data.getTrackedUserIDs(TOP_PLAYERS_SHOWN);
     return [];
   }
 }

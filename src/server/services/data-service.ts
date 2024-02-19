@@ -10,17 +10,18 @@ import type EquippedItems from "shared/data-models/equipped-items";
 import type Inventory from "shared/data-models/inventory";
 import type EarningsHistory from "shared/data-models/earnings-history";
 import Log from "shared/logger";
+import Object from "@rbxts/object-utils";
 
 const { initializeData, setData, incrementData, dataUpdate } = Events;
 const { getData } = Functions;
 
 // if you ever wanna wipe all data, just change the keyID
 // you can also use it to separate test databases and production databases
-const DATA_SCOPE = "PROD";
+const DATA_SCOPE = "TEST";
 
 @Service()
 export class DataService implements OnInit, OnPlayerJoin {
-	private readonly trackingDataStore = DataStoreService.GetOrderedDataStore("Tracking", DATA_SCOPE);
+	private readonly trackedData: TrackedDataKey[] = ["notes", "wins"];
 
 	public onInit(): void {
 		DataStore2.Combine("DATA", ...DataKeys);
@@ -31,15 +32,16 @@ export class DataService implements OnInit, OnPlayerJoin {
 	}
 
 	public onPlayerJoin(player: Player): void {
-		// this.trackingDataStore.SetAsync(tostring(player.UserId), 0);
+		for (const key of this.trackedData)
+			this.getTrackingStore(key).SetAsync(tostring(player.UserId), this.get<number>(player, key));
 	}
 
-	public getStoredUserIDs(amount: number): number[] {
-		const keyPages = this.trackingDataStore.GetSortedAsync(false, amount);
+	public getTrackedUserIDs(key: TrackedDataKey): number[] {
+		const keyPages = this.getTrackingStore(key).ListKeysAsync(undefined, 40);
 		const keys: string[] = [];
 		while (true) {
-			for (const key of keyPages.GetCurrentPage().map(page => page.key))
-				keys.push(key);
+			for (const key of keyPages.GetCurrentPage())
+				keys.push(<string>key);
 
 			if (keyPages.IsFinished) break;
 			keyPages.AdvanceToNextPageAsync();
@@ -58,6 +60,10 @@ export class DataService implements OnInit, OnPlayerJoin {
 
 	public set<T extends DataValue = DataValue>(player: Player, key: DataKey, value: T): void {
 		this.getStore<T>(player, key).Set(value);
+	}
+
+	public getTrackingStore(key: TrackedDataKey): DataStore {
+		return DataStoreService.GetDataStore(key, DATA_SCOPE)
 	}
 
 	private setup(player: Player): void {

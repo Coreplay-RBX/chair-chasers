@@ -12,21 +12,15 @@ export class EarningsService {
 
   public addWin(player: Player): void {
     this.data.increment(player, "wins");
-    this.track(player, 0, 1);
+    this.track(player, "wins");
   }
 
   public addNotes(player: Player, amount: number): void {
     this.data.increment(player, "notes", amount);
-    this.track(player, amount, 0);
+    this.track(player, "notes", amount);
   }
 
-  private track(player: Player, notesEarned: number, winsEarned: number): void {
-    const history = this.data.get<EarningsHistory[]>(player, "earningsHistory");
-    history.push({
-      notesEarned, winsEarned,
-      timestamp: os.time()
-    });
-
-    this.data.set(player, "earningsHistory", history);
+  private track(player: Player, key: TrackedDataKey, amount = 1): void {
+    this.data.getTrackingStore(key).IncrementAsync(tostring(player.UserId), amount);
   }
 }
