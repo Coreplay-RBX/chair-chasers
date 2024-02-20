@@ -59,6 +59,7 @@ interface PlayerGui extends BasePlayerGui {
         };
         UIListLayout: UIListLayout;
         Music: ImageButton & {
+          Off: ImageLabel;
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
       };

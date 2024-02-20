@@ -82,7 +82,7 @@ export class ChairCollection extends Destroyable {
       const chairSpawns = <Part[]>this.map.ChairSpawns.GetChildren();
       const spawn = chairSpawns[math.random(0, chairSpawns.size() - 1)];
       const [_, chairSize] = chair.GetBoundingBox();
-      const y = spawn.Position.Y - spawn.Size.Y + (chairSize.Y / 2);
+      const y = spawn.Position.Y - spawn.CFrame.UpVector.mul(spawn.Size.Y + (chairSize.Y / 2)).Y;
       const mapPosition = this.map.GetPivot().Position;
       const lookAt = mapPosition.sub(new Vector3(0, mapPosition.Y - y, 0));
 
