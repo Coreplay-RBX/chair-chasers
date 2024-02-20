@@ -85,7 +85,7 @@ export class ChairsService {
         this.selectWinner(_game);
     });
 
-    choosingChairs.broadcast();
+    choosingChairs.fire(_game.playersInGame);
   }
 
   private selectWinner(_game: GameService) {

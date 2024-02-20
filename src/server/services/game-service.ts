@@ -3,7 +3,7 @@ import { Players, Workspace as World } from "@rbxts/services";
 import { Timer, TimerState } from "@rbxts/timer";
 import Signal from "@rbxts/signal";
 
-import { Events } from "server/network";
+import { Events, Functions } from "server/network";
 import { toSeconds } from "shared/utilities/helpers";
 import type { OnPlayerJoin, OnPlayerLeave } from "server/hooks";
 
@@ -16,6 +16,7 @@ const {
   waitingForPlayers, intermissionStarted, gameStarted,
   playersInGameChanged
 } = Events;
+const { isInGame } = Functions;
 
 const enum GameState {
   None,
@@ -42,9 +43,11 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   ) {
 
     this.intermissionLength = toSeconds(serverSettings.get<string>("Rounds_IntermissionLength"));
-    this.gameLength = toSeconds(serverSettings.get<string>("Rounds_GameLength"));
+    this.gameLength = toSeconds(serverSettings.get<string>("Rounds_RoundLength"));
     this.minimumPlayers = serverSettings.get<number>("Rounds_MinimumPlayers");
-    this.playersChanged.Connect(playersInGame => playersInGameChanged.broadcast(playersInGame.map(p => p.UserId)))
+    this.playersChanged.Connect(playersInGame => playersInGameChanged.broadcast(playersInGame.map(p => p.UserId)));
+
+    isInGame.setCallback(player => this.playersInGame.includes(player));
   }
 
   public onPlayerJoin(player: Player): void {

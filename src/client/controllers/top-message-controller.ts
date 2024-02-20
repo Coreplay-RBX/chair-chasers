@@ -1,7 +1,7 @@
 import { Controller, type OnInit } from "@flamework/core";
 
 import { PlayerGui } from "shared/utilities/client";
-import { Events } from "client/network";
+import { Events, Functions } from "client/network";
 import { toTimerFormat } from "shared/utilities/helpers";
 
 const {

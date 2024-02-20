@@ -28,6 +28,7 @@ interface ClientEvents {
 
 interface ServerFunctions {
   getData(key: DataKey): DataValue;
+  isInGame(): boolean;
 }
 
 interface ClientFunctions {}
