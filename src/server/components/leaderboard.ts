@@ -40,15 +40,20 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   }
 
   private update(): void {
-    const allTime = this.getTopAllTime();
-    const monthly = this.getTopMonthly();
-    const weekly = this.getTopWeekly();
     const allTimeUI = this.createUI(this.instance.AllTime);
+    const [success1, allTime] = pcall(() => this.getTopAllTime());
+    if (success1)
+      this.updateScreen(allTime, allTimeUI);
+
     const monthlyUI = this.createUI(this.instance.Monthly);
+    const [success2, monthly] = pcall(() => this.getTopMonthly());
+    if (success2)
+      this.updateScreen(monthly, monthlyUI);
+
     const weeklyUI = this.createUI(this.instance.Weekly);
-    this.updateScreen(allTime, allTimeUI);
-    this.updateScreen(monthly, monthlyUI);
-    this.updateScreen(weekly, weeklyUI);
+    const [success3, weekly] = pcall(() => this.getTopWeekly());
+    if (success3)
+      this.updateScreen(weekly, weeklyUI);
   }
 
   private updateScreen(entries: LeaderboardEntry[], screen: LeaderboardScreen): void {
