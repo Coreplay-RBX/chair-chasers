@@ -17,7 +17,7 @@ export class MusicButton extends BaseComponent<{}, PlayerGui["Menu"]["Buttons"][
   public onStart(): void {
     this.janitor.Add(this.instance.MouseButton1Click.Connect(() => {
       this.enabled = !this.enabled;
-      this.instance.Off.Visible = this.enabled;
+      this.instance.Off.Visible = !this.enabled;
       Sound.CurrentSong.Volume = this.enabled ? this.defaultVolume : 0;
     }));
   }
