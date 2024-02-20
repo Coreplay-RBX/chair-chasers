@@ -6,7 +6,9 @@ import { Assets } from "shared/utilities/helpers";
 import Destroyable from "shared/utilities/destroyable";
 import type EquippedItems from "shared/data-models/equipped-items";
 
+import type { GameService } from "../game-service";
 import type { DataService } from "../data-service";
+import type { ChairsService } from ".";
 
 const CHAIR_MODEL = Assets.Models.Chairs["Basic Chair"];
 
@@ -17,15 +19,18 @@ export interface Chair extends Model {
 export class ChairCollection extends Destroyable {
   public spawned = false;
   public collection: Chair[] = [];
+  private size: number;
 
   public constructor(
+    private readonly chairs: ChairsService,
+    _game: GameService,
     private readonly data: DataService,
-    private readonly map: GameMap,
-    private size: number
+    private readonly map: GameMap
   ) {
 
     super();
-    this.spawn();
+    this.size = _game.playersInGame.size() - 1;
+    this.spawn(_game);
     this.janitor.Add(() => this.collection.clear());
   }
 
@@ -58,7 +63,7 @@ export class ChairCollection extends Destroyable {
       });
   }
 
-  private spawn(): void {
+  private spawn(_game: GameService): void {
     this.spawned = true;
 
     for (let i = 0; i < this.size; i++) {
@@ -76,13 +81,22 @@ export class ChairCollection extends Destroyable {
         const skinnedChair = changeChairSkin(chair, occupant, equipped.chairSkin)!;
         chair = skinnedChair ? this.janitor.Add(skinnedChair) : chair;
         this.collection = this.collection.filter(c => c.Parent !== undefined);
-        this.collection.push(chair);
+        if (!this.collection.includes(chair))
+          this.collection.push(chair);
+
+        if (this.collection.every(chair => chair.Seat.Occupant !== undefined))
+          task.delay(2, () => {  // after 2 seconds of every available seat being occupied
+            if (_game.playersInGame.size() > 1)
+              this.chairs.eliminateOutliers(_game);
+            else
+              this.chairs.selectWinner(_game);
+          });
       });
 
       const chairSpawns = <Part[]>this.map.ChairSpawns.GetChildren();
       const spawn = chairSpawns[math.random(0, chairSpawns.size() - 1)];
       const [_, chairSize] = chair.GetBoundingBox();
-      const y = spawn.Position.Y - spawn.CFrame.UpVector.mul(spawn.Size.Y + (chairSize.Y / 2)).Y;
+      const y = spawn.Position.Y - spawn.Size.Y + (chairSize.Y / 2);
       const mapPosition = this.map.GetPivot().Position;
       const lookAt = mapPosition.sub(new Vector3(0, mapPosition.Y - y, 0));
 

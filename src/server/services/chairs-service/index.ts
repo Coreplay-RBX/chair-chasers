@@ -39,9 +39,9 @@ export class ChairsService {
     this.startWalking(_game);
   }
 
-  public spawn(map: GameMap, amount: number): void {
+  public spawn(_game: GameService, map: GameMap): void {
     if (this.chairs) return;
-    this.chairs = new ChairCollection(this.data, map, amount);
+    this.chairs = new ChairCollection(this, _game, this.data, map);
   }
 
   public cleanup(_game: GameService): void {
@@ -49,6 +49,41 @@ export class ChairsService {
     this.chairs = undefined;
     _game.conclude();
     Log.info("Cleaned up game of musical chairs");
+  }
+
+  public selectWinner(_game: GameService) {
+    const [winner] = _game.playersInGame;
+    task.delay(5, () => this.cleanup(_game));
+    this.earnings.addWin(winner);
+
+    const winnerName = winner.DisplayName !== winner.Name ? `${winner.DisplayName} (${winner.Name})` : winner.Name;
+    won.broadcast(`${winnerName} has won the game!`);
+  }
+
+  public eliminateOutliers(_game: GameService): void {
+    if (!this.chairs) return;
+
+    const outliers = this.chairs.getOutliers(_game.playersInGame);
+    eliminated(outliers);
+    for (const outlier of outliers)
+      _game.eliminatePlayer(outlier);
+
+    for (const player of this.chairs!.getSeatedPlayers(_game.playersInGame)) {
+      const humanoid = player.Character!.FindFirstChildOfClass("Humanoid")!;
+      humanoid.JumpPower = 50;
+      humanoid.Jump = true;
+
+      const chair = this.chairs.find(chair => chair.Seat.Occupant === humanoid)!;
+      this.chairs!.removeChair(chair);
+    }
+
+    if (_game.playersInGame.size() < 1) { // game ending conditions
+      task.delay(5, () => this.cleanup(_game));
+      return won.broadcast("No one has won the game!");
+    } else if (_game.playersInGame.size() === 1)
+      return this.selectWinner(_game);
+
+    task.delay(3, () => this.startWalking(_game)); // if game isn't over, continue the cycle
   }
 
   private startWalking(_game: GameService): void {
@@ -86,40 +121,5 @@ export class ChairsService {
     });
 
     choosingChairs.fire(_game.playersInGame);
-  }
-
-  private selectWinner(_game: GameService) {
-    const [winner] = _game.playersInGame;
-    task.delay(5, () => this.cleanup(_game));
-    this.earnings.addWin(winner);
-
-    const winnerName = winner.DisplayName !== winner.Name ? `${winner.DisplayName} (${winner.Name})` : winner.Name;
-    won.broadcast(`${winnerName} has won the game!`);
-  }
-
-  private eliminateOutliers(_game: GameService): void {
-    if (!this.chairs) return;
-
-    const outliers = this.chairs.getOutliers(_game.playersInGame);
-    eliminated(outliers);
-    for (const outlier of outliers)
-      _game.eliminatePlayer(outlier);
-
-    for (const player of this.chairs!.getSeatedPlayers(_game.playersInGame)) {
-      const humanoid = player.Character!.FindFirstChildOfClass("Humanoid")!;
-      humanoid.JumpPower = 50;
-      humanoid.Jump = true;
-
-      const chair = this.chairs.find(chair => chair.Seat.Occupant === humanoid)!;
-      this.chairs!.removeChair(chair);
-    }
-
-    if (_game.playersInGame.size() < 1) { // game ending conditions
-      task.delay(5, () => this.cleanup(_game));
-      return won.broadcast("No one has won the game!");
-    } else if (_game.playersInGame.size() === 1)
-      return this.selectWinner(_game);
-
-    task.delay(3, () => this.startWalking(_game)); // if game isn't over, continue the cycle
   }
 }

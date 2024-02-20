@@ -138,7 +138,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     for (const player of Players.GetPlayers())
       this.addPlayer(player);
 
-    this.chairs.spawn(map, this.playersInGame.size() - 1);
+    this.chairs.spawn(this, map);
     task.delay(3, () => this.chairs.beginGame(this));
   }
 
