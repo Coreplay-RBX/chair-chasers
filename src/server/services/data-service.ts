@@ -3,6 +3,7 @@ import { DataStoreService } from "@rbxts/services"
 import DataStore2 from "@rbxts/datastore2";
 
 import { Events, Functions } from "server/network";
+import type { OnPlayerJoin } from "server/hooks";
 
 import { type DataKey, type DataValue, DataKeys } from "shared/data-models/generic";
 import type EquippedItems from "shared/data-models/equipped-items";
@@ -16,10 +17,11 @@ const { getData } = Functions;
 // if you ever wanna wipe all data, just change the keyID
 // you can also use it to separate test databases and production databases
 const DATA_SCOPE = "TEST";
+const LEADERSTATS_KEYS: TrackedDataKey[] = ["notes", "wins"]; // this is in order!
 
 @Service()
-export class DataService implements OnInit {
-	private readonly trackedData: TrackedDataKey[] = ["notes", "wins"];
+export class DataService implements OnInit, OnPlayerJoin {
+	private readonly leaderstats = new Instance("IntValue");
 
 	public onInit(): void {
 		DataStore2.Combine("DATA", ...DataKeys);
@@ -27,6 +29,11 @@ export class DataService implements OnInit {
 		setData.connect((player, key, value) => this.set(player, key, value));
 		incrementData.connect((player, key, amount) => this.increment(player, key, amount))
 		getData.setCallback((player, key) => this.get(player, key));
+	}
+
+	public onPlayerJoin(player: Player): void {
+		this.leaderstats.Name = "leaderstats";
+		this.leaderstats.Parent = player;
 	}
 
 	public getTrackedUserIDs(): number[] {
@@ -78,6 +85,12 @@ export class DataService implements OnInit {
 			chairSkin: undefined
 		});
 
+		for (const key of LEADERSTATS_KEYS) {
+			const value = new Instance("IntValue");
+			value.Name = key.sub(1, 1).upper() + key.sub(2);
+			value.Value = this.get<number>(player, key);
+			value.Parent = this.leaderstats;
+		}
 		Log.info("Initialized data");
 	}
 
