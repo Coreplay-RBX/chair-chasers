@@ -52,7 +52,10 @@ export class ChairCollection extends Destroyable {
 
   public toggleAll(on: boolean): void {
     for (const chair of this.collection)
-      task.spawn(() => chair.Seat.Disabled = !on);
+      task.spawn(() => {
+        if (!chair.FindFirstChildOfClass("Seat")) return;
+        chair.Seat.Disabled = !on
+      });
   }
 
   private spawn(): void {
@@ -79,10 +82,11 @@ export class ChairCollection extends Destroyable {
       const chairSpawns = <Part[]>this.map.ChairSpawns.GetChildren();
       const spawn = chairSpawns[math.random(0, chairSpawns.size() - 1)];
       const [_, chairSize] = chair.GetBoundingBox();
-      const y = spawn.Position.Y - (spawn.Size.Y / 2) + (chairSize.Y / 2);
-      const pivot = chair.GetPivot()
+      const y = spawn.Position.Y - spawn.Size.Y + (chairSize.Y / 2);
+      const mapPosition = this.map.GetPivot().Position;
+      const lookAt = mapPosition.sub(new Vector3(0, mapPosition.Y - y, 0));
 
-      chair.PivotTo(CFrame.lookAt(new Vector3(pivot.X, y, pivot.Z), this.map.GetPivot().Position));
+      chair.PivotTo(CFrame.lookAt(new Vector3(spawn.Position.X, y, spawn.Position.Z), lookAt));
       chair.Seat.Disabled = true;
       chair.Parent = World.LoadedMap.Chairs;
       this.collection.push(chair);

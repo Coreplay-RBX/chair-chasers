@@ -102,18 +102,16 @@ export class ChairsService {
 
     const outliers = this.chairs.getOutliers(_game.playersInGame);
     eliminated(outliers);
-    for (const player of this.chairs!.getSeatedPlayers(_game.playersInGame)) {
-      const humanoid = player.Character!.FindFirstChildOfClass("Humanoid")!;
-      const chair = this.chairs.find(chair => chair.Seat.Occupant === humanoid)!;
-      this.chairs!.removeChair(chair);
-
-      humanoid.JumpPower = 50;
-      humanoid.Jump = true;
-    }
-
-    for (const outlier of outliers) {
+    for (const outlier of outliers)
       _game.eliminatePlayer(outlier);
 
+    for (const player of this.chairs!.getSeatedPlayers(_game.playersInGame)) {
+      const humanoid = player.Character!.FindFirstChildOfClass("Humanoid")!;
+      humanoid.JumpPower = 50;
+      humanoid.Jump = true;
+
+      const chair = this.chairs.find(chair => chair.Seat.Occupant === humanoid)!;
+      this.chairs!.removeChair(chair);
     }
 
     if (_game.playersInGame.size() < 1) { // game ending conditions

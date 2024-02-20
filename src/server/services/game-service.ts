@@ -1,16 +1,21 @@
 import { Service, type OnTick } from "@flamework/core";
 import { Players, Workspace as World } from "@rbxts/services";
 import { Timer, TimerState } from "@rbxts/timer";
+import Signal from "@rbxts/signal";
 
-import { toSeconds } from "shared/utilities/helpers";
 import { Events } from "server/network";
+import { toSeconds } from "shared/utilities/helpers";
 import type { OnPlayerJoin, OnPlayerLeave } from "server/hooks";
 
 import type { MapVotingService } from "./map-voting-service";
 import type { ChairsService } from "./chairs-service";
 import type { ServerSettingsService } from "./server-settings-service";
 
-const { updateIntermissionTimer, updateGameTimer, waitingForPlayers, intermissionStarted, gameStarted } = Events;
+const {
+  updateIntermissionTimer, updateGameTimer,
+  waitingForPlayers, intermissionStarted, gameStarted,
+  playersInGameChanged
+} = Events;
 
 const enum GameState {
   None,
@@ -22,6 +27,7 @@ const enum GameState {
 @Service()
 export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   public readonly playersInGame: Player[] = [];
+  public readonly playersChanged = new Signal<(playersInGame: Player[]) => void>;
 
   private readonly intermissionLength: number;
   private readonly gameLength: number;
@@ -38,6 +44,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     this.intermissionLength = toSeconds(serverSettings.get<string>("Rounds_IntermissionLength"));
     this.gameLength = toSeconds(serverSettings.get<string>("Rounds_GameLength"));
     this.minimumPlayers = serverSettings.get<number>("Rounds_MinimumPlayers");
+    this.playersChanged.Connect(playersInGame => playersInGameChanged.broadcast(playersInGame.map(p => p.UserId)))
   }
 
   public onPlayerJoin(player: Player): void {
@@ -60,7 +67,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
 
   public onPlayerLeave(player: Player): void {
     if (this.playersInGame.includes(player))
-      this.playersInGame.remove(this.playersInGame.indexOf(player));
+      this.removePlayer(player)
   }
 
   public onTick(): void {
@@ -76,13 +83,14 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   }
 
   public eliminatePlayer(player: Player): void {
-    this.playersInGame.remove(this.playersInGame.indexOf(player));
+    this.removePlayer(player)
     this.teleportPlayerToLobby(player);
   }
 
   public startIntermission(): void {
     this.state = GameState.Intermission;
     this.playersInGame.clear();
+    this.playersChanged.Fire(this.playersInGame);
     this.cancelTimer();
     this.startTimer();
     this.mapVoting.start();
@@ -103,6 +111,16 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     }
   }
 
+  private removePlayer(player: Player): void {
+    this.playersInGame.remove(this.playersInGame.indexOf(player));
+    this.playersChanged.Fire(this.playersInGame);
+  }
+
+  private addPlayer(player: Player) {
+    this.playersInGame.push(player);
+    this.playersChanged.Fire(this.playersInGame);
+  }
+
   private startGame(): void {
     this.state = GameState.Active;
     this.cancelTimer();
@@ -115,7 +133,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     gameStarted.broadcast();
 
     for (const player of Players.GetPlayers())
-      this.playersInGame.push(player);
+      this.addPlayer(player);
 
     this.chairs.spawn(map, this.playersInGame.size() - 1);
     task.delay(3, () => this.chairs.beginGame(this));

@@ -21,14 +21,12 @@ export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelec
   private readonly options = [this.instance.Option1, this.instance.Option2, this.instance.Option3];
 
   public constructor(
-    private readonly menu: MenuController,
-    private readonly blur: UIBlurController
+    private readonly menu: MenuController
   ) { super(); }
 
   public onStart(): void {
     this.janitor.Add(closeMapVotingFrame.connect(() => {
-      this.menu.setPage("Buttons");
-      this.toggle(false);
+      this.menu.setPage("Buttons", false);
       this.reset();
 
       for (const option of this.options)
@@ -36,35 +34,30 @@ export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelec
     }));
 
     this.janitor.Add(mapVotingStarted.connect(maps => {
-      this.menu.hideAllPages();
-      this.toggle(true);
+      if (this.menu.isPageOpen("DailyRewards")) return;
+      this.menu.setPage("MapSelection", true);
 
-      for (const [i, mapName] of Object.entries(maps)) {
-        const option = this.options[i - 1];
-        const previewMap = <GameMap>Assets.Maps.WaitForChild(mapName).Clone();
-        const camera = new Instance("Camera");
-        camera.Focus = <CFrame>previewMap.GetAttribute("ThumbnailFocus");
-        camera.CFrame = <CFrame>previewMap.GetAttribute("ThumbnailCFrame");
-        camera.FieldOfView = <number>previewMap.GetAttribute("ThumbnailFOV");
-        previewMap.Parent = option.MapViewport;
-        option.MapViewport.CurrentCamera = camera;
+      for (const [i, mapName] of Object.entries(maps))
+        task.spawn(() => {
+          const option = this.options[i - 1];
+          const previewMap = <GameMap>Assets.Maps.WaitForChild(mapName).Clone();
+          const camera = new Instance("Camera");
+          camera.CFrame = <CFrame>previewMap.GetAttribute("ThumbnailCFrame");
+          camera.FieldOfView = <number>previewMap.GetAttribute("ThumbnailFOV");
+          previewMap.Parent = option.MapViewport;
+          option.MapViewport.CurrentCamera = camera;
 
-        option.Select.MouseButton1Click.Connect(() => {
-          voteForMap(i - 1);
-          for (const otherOption of this.options)
-            otherOption.Selected.Visible = otherOption === option;
+          option.Select.MouseButton1Click.Connect(() => {
+            voteForMap(i - 1);
+            for (const otherOption of this.options)
+              otherOption.Selected.Visible = otherOption === option;
+          });
         });
-      }
     }));
   }
 
   private reset(): void {
     for (const option of this.options)
       option.Selected.Visible = false;
-  }
-
-  private toggle(on: boolean) {
-    this.instance.Visible = on;
-    this.blur.toggle(on);
   }
 }

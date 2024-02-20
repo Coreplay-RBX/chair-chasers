@@ -23,6 +23,7 @@ interface ClientEvents {
   choosingChairs(): void;
   eliminated(): void;
   won(message: string): void;
+  playersInGameChanged(playerIDs: number[]): void;
 }
 
 interface ServerFunctions {

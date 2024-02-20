@@ -19,13 +19,9 @@ export class MapVotingService implements OnInit {
   }
 
   public start(): void {
-    const shuffledMaps = MAPS
-      .sort(() => (new Random).NextInteger(-1, 0) < 0);
-
+    const shuffledMaps = MAPS.sort(() => (new Random).NextInteger(-1, 0) < 0);
     this.mapPool = slice(shuffledMaps, 0, 3);
     mapVotingStarted.broadcast(this.mapPool.map(map => map.Name));
-
-    Log.info(`Started map voting. Current map pool: ${this.mapPool.map(map => map.Name).join(", ")}`);
   }
 
   public openUI(player: Player): void {

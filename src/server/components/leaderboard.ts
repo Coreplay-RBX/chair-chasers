@@ -30,8 +30,6 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   ) { super(); }
 
   public onStart(): void {
-
-
     const refreshRate = toSeconds(<string>this.serverSettings.get("Leaderboard_RefreshRate"));
     task.spawn(() => {
       while (true) {
@@ -53,11 +51,12 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
     this.updateScreen(weekly, weeklyUI);
   }
 
-  private updateScreen(entries: LeaderboardEntry[], screen: LeaderboardScreen) {
+  private updateScreen(entries: LeaderboardEntry[], screen: LeaderboardScreen): void {
+    print("updated leaderboard screen:", this.instance.GetFullName())
     this.clearScreenEntries(screen);
-    for (const entry of entries) {
-      const index = entries.indexOf(entry);
+    for (const entry of entries)
       task.spawn(() => {
+        const index = entries.indexOf(entry);
         const frame = Assets.UI.LeaderboardEntry.Clone();
         frame.Avatar.Image = Players.GetUserThumbnailAsync(entry.playerID, Enum.ThumbnailType.AvatarBust, Enum.ThumbnailSize.Size100x100)[0];
         frame.PlayerName.Text = Players.GetNameFromUserIdAsync(entry.playerID);
@@ -66,7 +65,6 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
         frame.LayoutOrder = index;
         frame.Parent = screen.Scroller;
       });
-    }
   }
 
   private clearScreenEntries(screen: LeaderboardScreen): void {
@@ -80,7 +78,6 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   }
 
   private createUI(parent: Part): LeaderboardScreen {
-    print("created ui for", parent.GetFullName())
     const ui = new Instance("SurfaceGui");
     ui.Name = "Screen";
     ui.Adornee = parent;
