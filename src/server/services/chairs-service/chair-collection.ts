@@ -19,16 +19,18 @@ export interface Chair extends Model {
 export class ChairCollection extends Destroyable {
   public spawned = false;
   public collection: Chair[] = [];
+
+  private readonly map: GameMap;
   private size: number;
 
   public constructor(
     private readonly chairs: ChairsService,
     _game: GameService,
-    private readonly data: DataService,
-    private readonly map: GameMap
+    private readonly data: DataService
   ) {
 
     super();
+    this.map = _game.currentMap!;
     this.size = _game.playersInGame.size() - 1;
     this.spawn(_game);
     this.janitor.Add(() => this.collection.clear());
@@ -53,14 +55,6 @@ export class ChairCollection extends Destroyable {
     this.collection.remove(this.collection.indexOf(chair));
     chair.Destroy();
     this.size--;
-  }
-
-  public toggleAll(on: boolean): void {
-    for (const chair of this.collection)
-      task.spawn(() => {
-        if (!chair.FindFirstChildOfClass("Seat")) return;
-        chair.Seat.Disabled = !on
-      });
   }
 
   private spawn(_game: GameService): void {
@@ -101,7 +95,6 @@ export class ChairCollection extends Destroyable {
       const lookAt = mapPosition.sub(new Vector3(0, mapPosition.Y - y, 0));
 
       chair.PivotTo(CFrame.lookAt(new Vector3(spawn.Position.X, y, spawn.Position.Z), lookAt));
-      chair.Seat.Disabled = true;
       chair.Parent = World.LoadedMap.Chairs;
       this.collection.push(chair);
     }

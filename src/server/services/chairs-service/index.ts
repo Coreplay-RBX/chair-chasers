@@ -17,11 +17,9 @@ const { random } = math;
 
 @Service()
 export class ChairsService {
-  private chairs?: ChairCollection
-
-  private readonly minWalkingLength: number;
-  private readonly maxWalkingLength: number;
+  private readonly roamingLength = 5;
   private readonly choosingLength: number;
+  private chairs?: ChairCollection
 
   public constructor(
     private readonly data: DataService,
@@ -29,19 +27,20 @@ export class ChairsService {
     serverSettings: ServerSettingsService
   ) {
 
-    this.minWalkingLength = toSeconds(serverSettings.get<string>("Chairs_MinimumWalkingLength"));
-    this.maxWalkingLength = toSeconds(serverSettings.get<string>("Chairs_MaximumWalkingLength"));
     this.choosingLength = toSeconds(serverSettings.get<string>("Chairs_ChoosingLength"));
   }
 
   public beginGame(_game: GameService): void {
-    if (!this.chairs) return;
     this.startWalking(_game);
   }
 
-  public spawn(_game: GameService, map: GameMap): void {
-    if (this.chairs) return;
-    this.chairs = new ChairCollection(this, _game, this.data, map);
+  public spawn(_game: GameService): void {
+    if (this.chairs) {
+      this.chairs.destroy();
+      this.chairs = undefined;
+    }
+
+    this.chairs = new ChairCollection(this, _game, this.data);
   }
 
   public cleanup(_game: GameService): void {
@@ -87,11 +86,7 @@ export class ChairsService {
   }
 
   private startWalking(_game: GameService): void {
-    if (!this.chairs) return;
-    this.chairs.toggleAll(false);
-
-    const length = random(this.minWalkingLength, this.maxWalkingLength);
-    task.delay(length, () => {
+    task.delay(this.roamingLength, () => {
       this.stopWalkingPlayers(_game);
       this.startChoosing(_game);
     });
@@ -109,9 +104,7 @@ export class ChairsService {
   }
 
   private startChoosing(_game: GameService): void {
-    if (!this.chairs) return;
-    this.chairs.toggleAll(true);
-
+    this.spawn(_game);
     task.delay(this.choosingLength, () => {
       if (!this.chairs) return;
       if (_game.playersInGame.size() > 1)

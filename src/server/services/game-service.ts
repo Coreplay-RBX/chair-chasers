@@ -34,6 +34,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   private readonly gameLength: number;
   private readonly minimumPlayers: number;
   private state = GameState.None;
+  public currentMap?: GameMap;
   private currentTimer?: Timer;
 
   public constructor(
@@ -97,6 +98,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     this.cancelTimer();
     this.startTimer();
     this.mapVoting.start();
+    this.currentMap = undefined;
     intermissionStarted.broadcast();
   }
 
@@ -131,6 +133,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     const map = this.mapVoting.getWinner().Clone();
     map.Name = "Environment"
     map.Parent = World.LoadedMap;
+    this.currentMap = map;
 
     this.teleportPlayersToMap();
     gameStarted.broadcast();
@@ -138,7 +141,6 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
     for (const player of Players.GetPlayers())
       this.addPlayer(player);
 
-    this.chairs.spawn(this, map);
     task.delay(3, () => this.chairs.beginGame(this));
   }
 
@@ -178,11 +180,6 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
 
   private teleportPlayer(player: Player, part: Part) {
     player.Character!.PivotTo(part.CFrame.add(new Vector3(0, 6, 0)));
-  }
-
-  private teleportPlayers(part: Part): void {
-    for (const player of Players.GetPlayers())
-      this.teleportPlayer(player, part);
   }
 
   private teleportPlayerToLobby(player: Player): void {
