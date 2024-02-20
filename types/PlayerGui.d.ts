@@ -129,23 +129,21 @@ interface PlayerGui extends BasePlayerGui {
       };
     };
     Spectate: Frame & {
-      Selector: ImageLabel & {
-        ["Cancel button"]: ImageButton & {
+      Main: ImageLabel & {
+        Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
         UIAspectRatioConstraint: UIAspectRatioConstraint;
-        ScrollingFrame: ScrollingFrame & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
+        List: ScrollingFrame;
       };
-      Preview: ImageLabel & {
-        ["Cancel button"]: ImageButton & {
+    };
+    SwapSpectate: Frame & {
+      Main: ImageLabel & {
+        Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
         };
         UIAspectRatioConstraint: UIAspectRatioConstraint;
-        ScrollingFrame: ScrollingFrame & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
+        List: ScrollingFrame;
       };
     };
     Shop: Frame & {

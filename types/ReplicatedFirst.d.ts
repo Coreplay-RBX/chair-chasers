@@ -3,6 +3,20 @@ interface ReplicatedFirst extends Instance {
   Assets: Folder & {
     Maps: Folder;
     UI: Folder & {
+      SelectSpectate: ImageButton & {
+        Username: TextLabel;
+        Icon: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+        DisplayName: TextLabel;
+      };
+      SwapSpectate: ImageButton & {
+        Username: TextLabel;
+        Icon: ImageButton & {
+          UIAspectRatioConstraint: UIAspectRatioConstraint;
+        };
+        DisplayName: TextLabel;
+      };
       ViewportButton: ImageButton & {
         Viewport: ViewportFrame;
       };

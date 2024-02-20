@@ -16,10 +16,9 @@ const { mapVotingStarted, closeMapVotingFrame, voteForMap } = Events;
   tag: "MapVotingPage",
   ancestorWhitelist: [ PlayerGui ]
 })
-export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelection"]> implements OnStart {
+export class MapVotingPage extends BaseComponent<{}, PlayerGui["Menu"]["MapSelection"]["Main"]> implements OnStart {
   private readonly janitor = new Janitor;
-  private readonly main = this.instance.Main;
-  private readonly options = [this.main.Option1, this.main.Option2, this.main.Option3];
+  private readonly options = [this.instance.Option1, this.instance.Option2, this.instance.Option3];
 
   public constructor(
     private readonly menu: MenuController,

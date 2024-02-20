@@ -24,12 +24,12 @@ interface Attributes {
   tag: "CodesPage",
   ancestorWhitelist: [ PlayerGui ]
 })
-export class CodesPage extends BaseComponent<Attributes, PlayerGui["Menu"]["Codes"]> implements OnStart {
+export class CodesPage extends BaseComponent<Attributes, PlayerGui["Menu"]["Codes"]["Main"]> implements OnStart {
   private readonly janitor = new Janitor;
   private readonly codes = <CodeList>require(ReplicatedFirst.CodeList);
 
   public onStart(): void {
-    this.janitor.Add(this.instance.Main.Redeem.MouseButton1Click.Connect(() => {
+    this.janitor.Add(this.instance.Redeem.MouseButton1Click.Connect(() => {
       this.redeem();
     }));
 
@@ -37,7 +37,7 @@ export class CodesPage extends BaseComponent<Attributes, PlayerGui["Menu"]["Code
   }
 
   private async redeem(): Promise<void> {
-    const code = trim(this.instance.Main.TextBubble.Input.Text).lower();
+    const code = trim(this.instance.TextBubble.Input.Text).lower();
     const reward = this.codes[code];
     if (!reward)
       return this.redeemFailed("Invalid code!");
@@ -60,7 +60,7 @@ export class CodesPage extends BaseComponent<Attributes, PlayerGui["Menu"]["Code
       .SetTime(0.1)
       .SetReverses(true);
 
-    tween(this.instance.Main.Redeem, info, {
+    tween(this.instance.Redeem, info, {
       ImageColor3: Color3.fromRGB(225, 25, 25)
     });
   }
@@ -70,11 +70,11 @@ export class CodesPage extends BaseComponent<Attributes, PlayerGui["Menu"]["Code
     this.attributes.StatusDebounce = true;
 
     const color = err ? Color3.fromRGB(255, 50, 50) : Color3.fromRGB(112, 219, 97);
-    this.instance.Main.StatusMessage.Text = message;
-    this.instance.Main.StatusMessage.TextColor3 = color;
-    this.instance.Main.StatusMessage.Visible = true;
+    this.instance.StatusMessage.Text = message;
+    this.instance.StatusMessage.TextColor3 = color;
+    this.instance.StatusMessage.Visible = true;
     task.delay(2.5, () => {
-      this.instance.Main.StatusMessage.Visible = false;
+      this.instance.StatusMessage.Visible = false;
       this.attributes.StatusDebounce = false;
     });
   }
