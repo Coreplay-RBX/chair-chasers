@@ -154,7 +154,7 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
       const timedHistory = allHistory.filter(history => {
         const now = os.time();
         const diff = now - history.timestamp;
-        const dayDiff = diff / 60 / 24;
+        const dayDiff = diff / 60 / 60 / 24;
         return dayDiff <= days;
       });
 

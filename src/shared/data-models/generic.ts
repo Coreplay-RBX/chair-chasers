@@ -7,6 +7,8 @@ export interface GameDataModel {
   inventory: Inventory;
   equippedItems: EquippedItems;
   redeemedCodes: string[];
+  lastClaimedDaily: number;
+  consecutiveLogins: number;
 }
 
 export type DataValue = GameDataModel[DataKey];
@@ -15,5 +17,5 @@ export type DataKey = keyof GameDataModel;
 export const DataKeys: DataKey[] = [
   "notes", "wins",
   "inventory", "equippedItems",
-  "redeemedCodes"
+  "redeemedCodes", "lastClaimedDaily", "consecutiveLogins"
 ];

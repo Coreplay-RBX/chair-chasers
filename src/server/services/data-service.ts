@@ -88,6 +88,8 @@ export class DataService implements OnInit, OnPlayerJoin {
 			pet: undefined,
 			weapon: undefined
 		});
+		this.initialize(player, "lastClaimedDaily", 0);
+		this.initialize(player, "consecutiveLogins", 0);
 
 		for (const key of LEADERSTATS_KEYS) {
 			const value = new Instance("IntValue");
