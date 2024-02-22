@@ -79,10 +79,14 @@ export class DataService implements OnInit, OnPlayerJoin {
 		this.initialize(player, "wins", 0);
 		this.initialize(player, "redeemedCodes", []);
 		this.initialize<Inventory>(player, "inventory", {
-			chairSkins: []
+			chairSkins: [],
+			pets: [],
+			weapons: []
 		});
 		this.initialize<EquippedItems>(player, "equippedItems", {
-			chairSkin: undefined
+			chairSkin: undefined,
+			pet: undefined,
+			weapon: undefined
 		});
 
 		for (const key of LEADERSTATS_KEYS) {

@@ -149,34 +149,19 @@ interface PlayerGui extends BasePlayerGui {
     };
     Shop: Frame & {
       Main: ImageLabel & {
-        Exit: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        ItemDisplay: ImageLabel & {
-          Description: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          Buy: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
+        Exit: ImageButton;
+        Display: ImageLabel & {
+          Viewport: ViewportFrame;
+          Description: TextLabel;
+          Buy: ImageButton;
         };
         Tabs: ScrollingFrame & {
           UIListLayout: UIListLayout;
-          Weapons: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          Pets: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          Chairs: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
+          Weapons: ImageButton;
+          Pets: ImageButton;
+          Chairs: ImageButton;
         };
-        UIAspectRatioConstraint: UIAspectRatioConstraint;
-        Items: ScrollingFrame & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
+        Items: ScrollingFrame;
       };
     };
     MapSelection: Frame & {

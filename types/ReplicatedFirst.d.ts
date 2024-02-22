@@ -39,6 +39,12 @@ interface ReplicatedFirst extends Instance {
       };
     };
     Models: Folder & {
+      Pets: Folder & {
+        Test: Model;
+      };
+      Weapons: Folder & {
+        Test: Model;
+      };
       Chairs: Folder & {
         ["Sun Chair"]: Model & {
           Seat: Seat;

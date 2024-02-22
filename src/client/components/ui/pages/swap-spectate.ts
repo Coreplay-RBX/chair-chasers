@@ -15,7 +15,7 @@ const { playersInGameChanged } = Events;
   tag: "SwapSpectatePage",
   ancestorWhitelist: [ PlayerGui ]
 })
-export class SwapSpectate extends BaseComponent<{}, PlayerGui["Menu"]["SwapSpectate"]["Main"]> implements OnStart {
+export class SwapSpectatePage extends BaseComponent<{}, PlayerGui["Menu"]["SwapSpectate"]["Main"]> implements OnStart {
   private readonly janitor = new Janitor;
 
   public constructor(

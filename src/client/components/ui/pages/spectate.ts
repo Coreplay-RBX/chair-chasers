@@ -16,7 +16,7 @@ const { playersInGameChanged, intermissionStarted } = Events;
   tag: "SpectatePage",
   ancestorWhitelist: [ PlayerGui ]
 })
-export class Spectate extends BaseComponent<{}, PlayerGui["Menu"]["Spectate"]["Main"]> implements OnStart {
+export class SpectatePage extends BaseComponent<{}, PlayerGui["Menu"]["Spectate"]["Main"]> implements OnStart {
   private readonly janitor = new Janitor;
 
   public constructor(

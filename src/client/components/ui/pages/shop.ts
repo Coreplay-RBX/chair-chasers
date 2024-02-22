@@ -3,11 +3,9 @@ import { Component, BaseComponent } from "@flamework/components";
 import { Janitor } from "@rbxts/janitor";
 
 import { Events, Functions } from "client/network";
-import { PlayerGui } from "shared/utilities/client";
 import { Assets } from "shared/utilities/helpers";
-import type { ChairSkinName, PetName, WeaponName } from "shared/data-models/inventory-item-names";
+import { PlayerGui } from "shared/utilities/client";
 import type Inventory from "shared/data-models/inventory";
-import type EquippedItems from "shared/data-models/equipped-items";
 
 const { dataUpdate, setData } = Events;
 const { getData } = Functions;
@@ -16,38 +14,30 @@ const SELECTED_BUTTON = "rbxassetid://10160149151";
 const REGULAR_BUTTON = "rbxassetid://10160149748";
 
 @Component({
-  tag: "InventoryPage",
+  tag: "ShopPage",
   ancestorWhitelist: [ PlayerGui ]
 })
-export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventory"]["Main"]> implements OnStart {
+export class ShopPage extends BaseComponent<{}, PlayerGui["Menu"]["Shop"]["Main"]> implements OnStart {
   private readonly janitor = new Janitor;
   private readonly itemsPageTemplate = this.instance.Items;
   private readonly tabs: ScrollingFrame[] = [];
   private selectedTab = "Chairs";
   private selectedItem?: typeof Assets.UI.ViewportButton;
 
-  public onStart(): void {
-    this.janitor.Add(dataUpdate.connect((key, inventory) => {
+  public async onStart(): Promise<void> {
+    let conn: RBXScriptConnection;
+    conn = dataUpdate.connect((key, inventory) => {
       if (key !== "inventory") return;
-      this.update(<Inventory>inventory);
-    }));
 
-    this.janitor.Add(this.instance.Display.Equip.MouseButton1Click.Connect(() => this.equipSelected()));
-    this.createTabItemContainers();
-  }
-
-  private async update(inventory: Inventory): Promise<void> {
-    for (const tab of this.tabs) // get rid of old inventory buttons
-      tab.GetChildren()
-        .filter((i): i is ImageButton => i.IsA("ImageButton"))
-        .forEach(btn => btn.Destroy());
-
-    task.spawn(() => {
-      for (const chairSkin of inventory.chairSkins) {
-        const chairModel = <Model>Assets.Models.Chairs.WaitForChild(chairSkin).Clone();
-        this.createInventoryButton(chairSkin, "Chairs", chairModel);
+      conn.Disconnect();
+      for (const chair of <Model[]>Assets.Models.Chairs.GetChildren()) {
+        if (chair.GetAttribute("NotForSale")) continue;
+        this.createShopButton(<Inventory>inventory, chair.Name, "Chairs", chair.Clone());
       }
     });
+
+    this.janitor.Add(this.instance.Display.Buy.MouseButton1Click.Connect(() => this.buySelected()));
+    this.createTabItemContainers();
   }
 
   private createTabItemContainers(): void {
@@ -66,33 +56,20 @@ export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventor
     this.switchTab("Chairs");
   }
 
-  private async equipSelected(): Promise<void> {
+  private async buySelected(): Promise<void> {
     if (!this.selectedItem) return;
 
-    const equippedItems = <EquippedItems>await getData("equippedItems");
-    const category = <string>this.selectedItem.GetAttribute("ItemCategory");
+    const inventory = <Inventory>await getData("inventory");
+    const notes = <number>await getData("notes");
+    const equippedItemType = this.getItemTypeFromName();
     const itemName = <string>this.selectedItem.GetAttribute("ItemName");
-    const equippedItemType = this.getItemTypeFromTabName();
-    if (equippedItems[equippedItemType])
-      equippedItems[equippedItemType] = undefined; // unequip
+    const itemPrice = <number>this.selectedItem.GetAttribute("ItemPrice");
+    if (notes < itemPrice) return;
+    if ((<string[]>inventory[equippedItemType]).includes(itemName))
+      return;
 
-    else
-      switch (category) {
-        case "Chairs": {
-          equippedItems.chairSkin = <ChairSkinName>itemName;
-          break;
-        }
-        case "Pets": {
-          equippedItems.pet = <PetName>itemName;
-          break;
-        }
-        case "Weapon": {
-          equippedItems.weapon = <WeaponName>itemName;
-          break;
-        }
-      }
-
-    setData("equippedItems", equippedItems);
+    (<string[]>inventory[equippedItemType]).push(itemName);
+    setData("inventory", inventory);
   }
 
   private switchTab(tabName: string): void {
@@ -108,8 +85,8 @@ export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventor
 
     this.selectedItem = selectedButton;
     this.instance.Display.Visible = true;
-    this.instance.Display.Equip.Visible = !<boolean>this.selectedItem.GetAttribute("ItemEquipped");
-    this.instance.Display.Description.Text = <string>this.selectedItem.GetAttribute("ItemDescription");
+    this.instance.Display.Buy.Visible = !<boolean>this.selectedItem.GetAttribute("ItemOwned");
+    this.instance.Display.Description.Text = `${<string>this.selectedItem.GetAttribute("ItemDescription")} | ${<number>this.selectedItem.GetAttribute("ItemPrice")} notes`;
     for (const frame of this.getAllItemFrames())
       for (const button of this.getItemsFromFrame(frame))
         button.Image = button === selectedButton ? SELECTED_BUTTON : REGULAR_BUTTON;
@@ -129,24 +106,27 @@ export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventor
     this.instance.Display.Viewport.FindFirstChildOfClass("Model")?.Destroy();
   }
 
-  private createInventoryButton(itemName: string, category: string, viewportModel: Model): void {
+  private createShopButton(inventory: Inventory, itemName: string, category: string, viewportModel: Model): void {
     const button = Assets.UI.ViewportButton.Clone();
+    const itemType = this.getItemTypeFromName(category);
     viewportModel.Parent = button.Viewport;
-    button.Name = "InventoryItem";
+    button.Name = "ShopItem";
     button.MouseButton1Click.Connect(() => this.selectButton(button));
     button.Parent = this.getItemsFrame(category);
+    button.SetAttribute("ItemOwned", (<string[]>inventory[itemType]).includes(itemName));
     button.SetAttribute("ItemName", itemName);
     button.SetAttribute("ItemCategory", category);
     button.SetAttribute("ItemDescription", viewportModel.GetAttribute("ItemDescription"));
+    button.SetAttribute("ItemPrice", viewportModel.GetAttribute("ItemPrice"));
   }
 
-  private getItemTypeFromTabName(): keyof EquippedItems {
-    switch(this.selectedTab) {
-      case "Chairs": return "chairSkin";
-      case "Pets": return "pet";
-      case "Weapons": return "weapon";
+  private getItemTypeFromName(name = this.selectedTab): keyof Inventory {
+    switch(name) {
+      case "Chairs": return "chairSkins";
+      case "Pets": return "pets";
+      case "Weapons": return "weapons";
     }
-    return <keyof EquippedItems><unknown>undefined;
+    return <keyof Inventory><unknown>undefined;
   }
 
   private getItemsFromFrame(frame: ScrollingFrame): (typeof Assets.UI.ViewportButton)[] {
@@ -156,7 +136,7 @@ export class InventoryPage extends BaseComponent<{}, PlayerGui["Menu"]["Inventor
 
   private getAllItemFrames(): ScrollingFrame[] {
     return this.instance.GetChildren()
-      .filter((instance): instance is ScrollingFrame => instance.IsA("ScrollingFrame"));
+      .filter((instance): instance is ScrollingFrame => instance.IsA("ScrollingFrame") && instance.Name !== "Tabs");
   }
 
   private getItemsFrame(category: string): ScrollingFrame {
