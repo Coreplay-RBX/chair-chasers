@@ -5,10 +5,9 @@ import Object from "@rbxts/object-utils";
 
 import { Events } from "client/network";
 import { PlayerGui } from "shared/utilities/client";
+import { Assets } from "shared/utilities/helpers";
 
 import type { MenuController } from "client/controllers/menu-controller";
-import type { UIBlurController } from "client/controllers/ui-blur-controller";
-import { Assets } from "shared/utilities/helpers";
 
 const { mapVotingStarted, closeMapVotingFrame, voteForMap } = Events;
 

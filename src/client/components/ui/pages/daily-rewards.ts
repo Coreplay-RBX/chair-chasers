@@ -8,7 +8,7 @@ import { PlayerGui } from "shared/utilities/client";
 import type { MenuController } from "client/controllers/menu-controller";
 import { toRemainingTime } from "shared/utilities/helpers";
 
-const { dataUpdate, setData } = Events;
+const { dataUpdate } = Events;
 
 // TODO: if page is closed without claiming rewards, auto-claim them
 

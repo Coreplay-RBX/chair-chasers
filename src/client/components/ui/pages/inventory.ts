@@ -5,6 +5,7 @@ import { Janitor } from "@rbxts/janitor";
 import { Events, Functions } from "client/network";
 import { PlayerGui } from "shared/utilities/client";
 import { Assets } from "shared/utilities/helpers";
+
 import type { ChairSkinName, PetName, WeaponName } from "shared/data-models/inventory-item-names";
 import type Inventory from "shared/data-models/inventory";
 import type EquippedItems from "shared/data-models/equipped-items";

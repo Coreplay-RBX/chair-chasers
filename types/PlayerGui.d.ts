@@ -1,4 +1,12 @@
 interface PlayerGui extends BasePlayerGui {
+  LoadScreen : ScreenGui & {
+    Main: Frame & {
+      Progress: Frame & {
+        Bar: Frame;
+      };
+      Loading: TextLabel;
+    }
+  }
   TopMessages: ScreenGui & {
     Eliminated: ImageLabel;
     Win: ImageLabel & {

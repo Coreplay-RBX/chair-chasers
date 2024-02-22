@@ -148,3 +148,27 @@ export function parseSuffixedNumber(suffixed: string): number {
 
   return tonumber(numberPart)!;
 }
+export function removeDuplicates<T extends defined>(array: T[]): T[] {
+  const seen: T[] = [];
+  const result: T[] = [];
+  for (const value of array)
+    if (!seen.includes(value)) {
+      result.push(value);
+      seen.push(value);
+    }
+
+  return result;
+}export function flatten<T extends defined>(array: (T | T[])[]): T[] {
+  const result: T[] = [];
+  for (const value of array) {
+    if (typeOf(value) === "table") {
+      const flattenedSubtable = flatten(<T[]>value);
+      for (const subValue of flattenedSubtable)
+        result.push(subValue);
+    }
+    else
+      result.push(<T>value);
+  }
+  return result;
+}
+
