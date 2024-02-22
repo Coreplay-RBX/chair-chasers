@@ -1,8 +1,17 @@
+interface DailyRewardButton extends ImageButton {
+  TextLabel: TextLabel;
+  Rewards: ImageLabel & {
+    TextLabel: TextLabel;
+  };
+}
+
 interface PlayerGui extends BasePlayerGui {
   LoadScreen : ScreenGui & {
     Main: Frame & {
       Progress: Frame & {
-        Bar: Frame;
+        Bar: Frame & {
+          UIStroke: UIStroke;
+        };
       };
       Loading: TextLabel;
     }
@@ -77,40 +86,13 @@ interface PlayerGui extends BasePlayerGui {
     };
     DailyRewards: Frame & {
       Main: ImageLabel & {
-        Day1: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-            TextLabel: TextLabel & {
-              UIAspectRatioConstraint: UIAspectRatioConstraint;
-            };
-          };
-        };
+        Day1: DailyRewardButton;
+        Day2: DailyRewardButton;
+        Day3: DailyRewardButton;
+        Day4: DailyRewardButton;
+        Day5: Omit<DailyRewardButton, "TextLabel">;
         Exit: ImageButton & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        Day4: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-            TextLabel: TextLabel;
-          };
-        };
-        Day3: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-            TextLabel: TextLabel;
-          };
         };
         Clock: ImageLabel & {
           UIAspectRatioConstraint: UIAspectRatioConstraint;
@@ -118,23 +100,7 @@ interface PlayerGui extends BasePlayerGui {
             UIAspectRatioConstraint: UIAspectRatioConstraint;
           };
         };
-        Day5: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-        };
         UIAspectRatioConstraint: UIAspectRatioConstraint;
-        Day2: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
-          ["Collect button"]: ImageButton & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-            TextLabel: TextLabel;
-          };
-        };
       };
     };
     Spectate: Frame & {
