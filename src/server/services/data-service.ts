@@ -75,6 +75,12 @@ export class DataService implements OnInit, OnPlayerJoin {
 	}
 
 	private setup(player: Player): void {
+		for (const key of LEADERSTATS_KEYS) {
+			const value = new Instance("IntValue");
+			value.Name = key.sub(1, 1).upper() + key.sub(2);
+			value.Parent = this.leaderstats;
+		}
+
     this.initialize(player, "notes", 0);
 		this.initialize(player, "wins", 0);
 		this.initialize(player, "redeemedCodes", []);
@@ -91,12 +97,6 @@ export class DataService implements OnInit, OnPlayerJoin {
 		this.initialize(player, "lastClaimedDaily", 0);
 		this.initialize(player, "consecutiveLogins", 0);
 
-		for (const key of LEADERSTATS_KEYS) {
-			const value = new Instance("IntValue");
-			value.Name = key.sub(1, 1).upper() + key.sub(2);
-			value.Value = this.get<number>(player, key);
-			value.Parent = this.leaderstats;
-		}
 		Log.info("Initialized data");
 	}
 
@@ -119,6 +119,12 @@ export class DataService implements OnInit, OnPlayerJoin {
 	): void {
 
 		dataUpdate(player, key, value);
+		task.spawn(() => {
+			if (LEADERSTATS_KEYS.includes(<TrackedDataKey>key)) {
+				const stat = <IntValue>this.leaderstats.FindFirstChild(key.sub(1, 1).upper() + key.sub(2));
+				stat.Value = <number>value;
+			}
+		});
 	}
 
 	private getStore<T extends DataValue = DataValue>(player: Player, key: DataKey): DataStore2<T> {

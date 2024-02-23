@@ -71,8 +71,8 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   }
 
   public onPlayerLeave(player: Player): void {
-    if (this.playersInGame.includes(player))
-      this.removePlayer(player)
+    if (!this.playersInGame.includes(player)) return;
+    this.removePlayer(player)
   }
 
   public onTick(): void {
