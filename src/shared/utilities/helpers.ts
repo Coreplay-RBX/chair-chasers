@@ -23,6 +23,10 @@ export function toRegion3({ CFrame, Size }: Part, areaShrink = 0): Region3 {
   );
 }
 
+export function reverse<T extends defined>(arr: T[]): T[] {
+  return arr.map((_, i) => arr[arr.size() - 1 - i]);
+}
+
 export function slice<T extends defined>(arr: T[], start: number, finish?: number): T[] {
   const length = arr.size();
 

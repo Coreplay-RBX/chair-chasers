@@ -29,6 +29,7 @@ const enum GameState {
 export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   public readonly playersInGame: Player[] = [];
   public readonly playersChanged = new Signal<(playersInGame: Player[]) => void>;
+  public readonly placement: Player[] = [];
 
   private readonly intermissionLength: number;
   private readonly gameLength: number;
@@ -89,6 +90,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   public eliminatePlayer(player: Player): void {
     this.removePlayer(player)
     this.teleportPlayerToLobby(player);
+    this.placement.push(player);
   }
 
   public startIntermission(): void {
@@ -105,6 +107,7 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   public conclude(): void {
     this.teleportPlayersToLobby();
     this.startIntermission();
+    this.placement.clear();
     World.LoadedMap.Environment?.Destroy();
   }
 

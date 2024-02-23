@@ -57,7 +57,6 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   }
 
   private updateScreen(entries: LeaderboardEntry[], screen: LeaderboardScreen): void {
-    print("updated leaderboard screen:", this.instance.GetFullName())
     this.clearScreenEntries(screen);
     for (const entry of entries)
       task.spawn(() => {

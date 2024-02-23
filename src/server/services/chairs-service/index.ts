@@ -2,7 +2,7 @@ import { Service } from "@flamework/core";
 import { Workspace as World } from "@rbxts/services";
 
 import { Events } from "server/network";
-import { toSeconds } from "shared/utilities/helpers";
+import { reverse, slice, toSeconds } from "shared/utilities/helpers";
 import Log from "shared/logger";
 
 import { ChairCollection } from "./chair-collection";
@@ -13,7 +13,7 @@ import type { EarningsService } from "../earnings-service";
 import type { ServerSettingsService } from "../server-settings-service";
 
 const { walkingAroundChairs, choosingChairs, eliminated, won } = Events;
-const { random } = math;
+const { floor } = math;
 
 @Service()
 export class ChairsService {
@@ -52,11 +52,21 @@ export class ChairsService {
 
   public selectWinner(_game: GameService) {
     const [winner] = _game.playersInGame;
-    task.delay(5, () => this.cleanup(_game));
+    _game.placement.push(winner);
+
+    const topPlayerAmount = 5;
+    const topReward = 150; // notes
+    const topPlayers = reverse(slice(_game.placement, -topPlayerAmount));
     this.earnings.addWin(winner);
+    for (const player of topPlayers) {
+      const placement = topPlayers.indexOf(player) + 1;
+      const reward = floor(topReward / placement);
+      this.earnings.addNotes(player, reward)
+    }
 
     const winnerName = winner.DisplayName !== winner.Name ? `${winner.DisplayName} (${winner.Name})` : winner.Name;
     won.broadcast(`${winnerName} has won the game!`);
+    task.delay(5, () => this.cleanup(_game));
   }
 
   public eliminateOutliers(_game: GameService): void {
