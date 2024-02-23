@@ -105,6 +105,13 @@ export function toRemainingTime(seconds: number): string {
   return StringUtils.trim(remainingTime);
 }
 
+export function toLongRemainingTime(seconds: number): string {
+  const hours = floor(seconds / 3600);
+  const minutes = floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return "%02d:%02d:%02d".format(hours, minutes, remainingSeconds);
+}
+
 export function commaFormat(n: number | string): string {
   let formatted = tostring(n);
   const parts: string[] = [];

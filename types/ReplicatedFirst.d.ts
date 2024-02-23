@@ -1,5 +1,6 @@
 interface ReplicatedFirst extends Instance {
   CodeList: ModuleScript;
+  DailyRewards: ModuleScript;
   Assets: Folder & {
     Maps: Folder;
     UI: Folder & {
