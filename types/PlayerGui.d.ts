@@ -221,14 +221,10 @@ interface PlayerGui extends BasePlayerGui {
     };
     NoteShop: Frame & {
       Main: ImageLabel & {
-        Exit: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-        };
-        ["Best Value"]: ImageButton & {
-          UIAspectRatioConstraint: UIAspectRatioConstraint;
-          TextLabel: TextLabel & {
-            UIAspectRatioConstraint: UIAspectRatioConstraint;
-          };
+        Exit: ImageButton;
+        ImageButton: ImageButton & {
+          Icon: ImageLabel;
+          Price: TextLabel;
         };
         UIAspectRatioConstraint: UIAspectRatioConstraint;
       };
