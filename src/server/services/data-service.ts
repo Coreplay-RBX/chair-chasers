@@ -21,8 +21,6 @@ const LEADERSTATS_KEYS: TrackedDataKey[] = ["notes", "wins"]; // this is in orde
 
 @Service()
 export class DataService implements OnInit, OnPlayerJoin {
-	private readonly leaderstats = new Instance("IntValue");
-
 	public onInit(): void {
 		DataStore2.Combine("DATA", ...DataKeys);
 		initializeData.connect((player) => this.setup(player));
@@ -32,21 +30,22 @@ export class DataService implements OnInit, OnPlayerJoin {
 	}
 
 	public onPlayerJoin(player: Player): void {
-		this.leaderstats.Name = "leaderstats";
-		this.leaderstats.Parent = player;
+		const stats = new Instance("Folder");
+		stats.Name = "leaderstats";
+		stats.Parent = player;
 	}
 
-	public getTrackedUserIDs(): number[] {
-		const keyPages = this.getEarningsHistoryStore().ListKeysAsync(undefined, 40);
+	public getTrackedUserIDs(): string[] {
+		const keyPages = this.getEarningsHistoryStore().ListKeysAsync(undefined, 50);
 		const keys: string[] = [];
 		while (true) {
-			for (const key of keyPages.GetCurrentPage())
-				keys.push(<string>key);
+			for (const data of <DataStoreKey[]>keyPages.GetCurrentPage())
+				keys.push(data.KeyName);
 
 			if (keyPages.IsFinished) break;
 			keyPages.AdvanceToNextPageAsync();
 		}
-		return keys.map(k => tonumber(k)!);
+		return keys;
 	}
 
 	public increment(player: Player, key: DataKey, amount = 1): void {
@@ -71,14 +70,14 @@ export class DataService implements OnInit, OnPlayerJoin {
 	}
 
 	public getEarningsHistoryStore(): DataStore {
-		return DataStoreService.GetDataStore("earningsHistory", DATA_SCOPE);
+		return DataStoreService.GetDataStore("earningsHistory");
 	}
 
 	private setup(player: Player): void {
 		for (const key of LEADERSTATS_KEYS) {
 			const value = new Instance("IntValue");
 			value.Name = key.sub(1, 1).upper() + key.sub(2);
-			value.Parent = this.leaderstats;
+			value.Parent = player.FindFirstChild("leaderstats");
 		}
 
     this.initialize(player, "notes", 0);
@@ -97,7 +96,7 @@ export class DataService implements OnInit, OnPlayerJoin {
 		this.initialize(player, "lastClaimedDaily", 0);
 		this.initialize(player, "consecutiveLogins", 0);
 
-		Log.info("Initialized data");
+		Log.info(`Initialized data for "${player.Name}"`);
 	}
 
 	private initialize<T extends DataValue = DataValue>(
@@ -121,7 +120,7 @@ export class DataService implements OnInit, OnPlayerJoin {
 		dataUpdate(player, key, value);
 		task.spawn(() => {
 			if (LEADERSTATS_KEYS.includes(<TrackedDataKey>key)) {
-				const stat = <IntValue>this.leaderstats.FindFirstChild(key.sub(1, 1).upper() + key.sub(2));
+				const stat = <IntValue>player.FindFirstChild("leaderstats")!.FindFirstChild(key.sub(1, 1).upper() + key.sub(2));
 				stat.Value = <number>value;
 			}
 		});

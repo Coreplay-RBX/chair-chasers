@@ -7,6 +7,7 @@ import type EarningsHistory from "shared/data-models/earnings-history";
 
 import type { DataService } from "server/services/data-service";
 import type { ServerSettingsService } from "server/services/server-settings-service";
+import Log from "shared/logger";
 
 const TOP_PLAYERS_SHOWN = 50; // top 50, top 100, etc
 
@@ -23,6 +24,9 @@ interface LeaderboardScreen extends SurfaceGui {
 @Component({ tag: "Leaderboard" })
 export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements OnStart {
   private readonly dataType: TrackedDataKey = this.instance.Name === "WinsLeaderboard" ? "wins" : "notes";
+  private readonly allTimeUI = this.createUI(this.instance.AllTime);
+  private readonly monthlyUI = this.createUI(this.instance.Monthly);
+  private readonly weeklyUI = this.createUI(this.instance.Weekly);
 
   public constructor(
     private readonly data: DataService,
@@ -40,20 +44,23 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   }
 
   private update(): void {
-    const allTimeUI = this.createUI(this.instance.AllTime);
     const [success1, allTime] = pcall(() => this.getTopAllTime());
     if (success1)
-      this.updateScreen(allTime, allTimeUI);
+      this.updateScreen(allTime, this.allTimeUI);
+    else
+      Log.warning(<string>allTime);
 
-    const monthlyUI = this.createUI(this.instance.Monthly);
     const [success2, monthly] = pcall(() => this.getTopMonthly());
     if (success2)
-      this.updateScreen(monthly, monthlyUI);
+      this.updateScreen(monthly, this.monthlyUI);
+    else
+      Log.warning(<string>monthly);
 
-    const weeklyUI = this.createUI(this.instance.Weekly);
     const [success3, weekly] = pcall(() => this.getTopWeekly());
     if (success3)
-      this.updateScreen(weekly, weeklyUI);
+      this.updateScreen(weekly, this.weeklyUI);
+    else
+      Log.warning(<string>weekly);
   }
 
   private updateScreen(entries: LeaderboardEntry[], screen: LeaderboardScreen): void {
@@ -63,7 +70,7 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
         const index = entries.indexOf(entry);
         const frame = Assets.UI.LeaderboardEntry.Clone();
         frame.Avatar.Image = Players.GetUserThumbnailAsync(entry.playerID, Enum.ThumbnailType.AvatarBust, Enum.ThumbnailSize.Size100x100)[0];
-        frame.PlayerName.Text = Players.GetNameFromUserIdAsync(entry.playerID);
+        frame.PlayerName.Text = entry.playerID < 0 ? "TestPlayer" : Players.GetNameFromUserIdAsync(entry.playerID);
         frame.Rank.Text = `#${commaFormat(index + 1)}`
         frame.Value.Text = `${commaFormat(entry.dataValue)} ${entry.dataType}`;
         frame.LayoutOrder = index;
@@ -124,15 +131,14 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   }
 
   private getTopAllTime(): LeaderboardEntry[] {
-    const historyStore = this.data.getEarningsHistoryStore();
     const allUserIDs = this.data.getTrackedUserIDs();
     const allTime: LeaderboardEntry[] = [];
 
     for (const userID of allUserIDs) {
-      const allHistory = historyStore.GetAsync<EarningsHistory[]>(tostring(userID))[0]!;
+      const allHistory = this.getAllEarningsHistory(userID);
       const allTimeEarnings = allHistory.reduce((sum, history) => sum + history[this.dataType], 0);
       allTime.push({
-        playerID: userID,
+        playerID: tonumber(userID)!,
         dataType: this.dataType,
         dataValue: allTimeEarnings
       });
@@ -144,12 +150,11 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
   }
 
   private getTopTimed(days: number): LeaderboardEntry[] {
-    const historyStore = this.data.getEarningsHistoryStore();
     const allUserIDs = this.data.getTrackedUserIDs();
     const allTimed: LeaderboardEntry[] = [];
 
     for (const userID of allUserIDs) {
-      const allHistory = historyStore.GetAsync<EarningsHistory[]>(tostring(userID))[0]!;
+      const allHistory = this.getAllEarningsHistory(userID);
       const timedHistory = allHistory.filter(history => {
         const now = os.time();
         const diff = now - history.timestamp;
@@ -159,7 +164,7 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
 
       const timedEarnings = timedHistory.reduce((sum, history) => sum + history[this.dataType], 0);
       allTimed.push({
-        playerID: userID,
+        playerID: tonumber(userID)!,
         dataType: this.dataType,
         dataValue: timedEarnings
       });
@@ -168,5 +173,10 @@ export class Leaderboard extends BaseComponent<{}, LeaderboardModel> implements 
     return allTimed
       .sort((a, b) => a.dataValue > b.dataValue)
       .filter((_, i) => i < TOP_PLAYERS_SHOWN);
+  }
+
+  private getAllEarningsHistory(userID: string): EarningsHistory[] {
+    const historyStore = this.data.getEarningsHistoryStore();
+    return historyStore.GetAsync<EarningsHistory[]>(userID)[0] ?? [];
   }
 }
