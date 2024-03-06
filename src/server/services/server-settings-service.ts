@@ -7,4 +7,8 @@ export class ServerSettingsService {
     const settings = Runtime.IsStudio() ? ServerStorage.TestServerSettings : ServerStorage.ServerSettings;
     return <T>settings.GetAttribute(settingName);
   }
+
+  public getNoteAmount(noteTier: string): number {
+    return <number>ServerStorage.PurchasableNoteAmounts.GetAttribute(noteTier);
+  }
 }

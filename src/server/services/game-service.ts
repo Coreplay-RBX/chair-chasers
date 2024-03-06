@@ -29,13 +29,14 @@ const enum GameState {
 export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   public readonly playersInGame: Player[] = [];
   public readonly playersChanged = new Signal<(playersInGame: Player[]) => void>;
+  public readonly roundEnded = new Signal;
   public readonly placement: Player[] = [];
+  public currentMap?: GameMap;
 
   private readonly intermissionLength: number;
   private readonly gameLength: number;
   private readonly minimumPlayers: number;
   private state = GameState.None;
-  public currentMap?: GameMap;
   private currentTimer?: Timer;
 
   public constructor(
@@ -112,20 +113,23 @@ export class GameService implements OnTick, OnPlayerJoin, OnPlayerLeave {
   }
 
   public teleportPlayersToMap(): void {
+    for (const player of Players.GetPlayers())
+      this.teleportPlayerToMap(player);
+  }
+
+  public teleportPlayerToMap(player: Player): void {
     const mapSpawns = <Part[]>World.LoadedMap.Environment!.PlayerSpawns.GetChildren();
-    for (const player of Players.GetPlayers()) {
-      const spawn = mapSpawns[math.random(0, mapSpawns.size() - 1)];
-      this.teleportPlayer(player, spawn);
-    }
+    const spawn = mapSpawns[math.random(0, mapSpawns.size() - 1)];
+    this.teleportPlayer(player, spawn);
+  }
+
+  public addPlayer(player: Player) {
+    this.playersInGame.push(player);
+    this.playersChanged.Fire(this.playersInGame);
   }
 
   private removePlayer(player: Player): void {
     this.playersInGame.remove(this.playersInGame.indexOf(player));
-    this.playersChanged.Fire(this.playersInGame);
-  }
-
-  private addPlayer(player: Player) {
-    this.playersInGame.push(player);
     this.playersChanged.Fire(this.playersInGame);
   }
 

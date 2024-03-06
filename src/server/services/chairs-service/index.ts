@@ -86,6 +86,7 @@ export class ChairsService {
       this.chairs!.removeChair(chair);
     }
 
+    _game.roundEnded.Fire();
     if (_game.playersInGame.size() < 1) { // game ending conditions
       task.delay(5, () => this.cleanup(_game));
       return won.broadcast("No one has won the game!");
